@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 数据与日志
+data/
+logs/
+*.db
+*.db-journal
+*.log
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# 导出文件
+exports/
+*.csv
+
+# 临时文件
+*.tmp
+*.bak
+*.orig
+
+# 微信相关
+wechat_cache/
+
+# 操作系统
+Thumbs.db

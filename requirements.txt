@@ -1,0 +1,61 @@
+# 基础依赖
+pyyaml>=6.0
+requests>=2.31.0
+
+# AI & LLM
+openai>=1.0.0
+anthropic>=0.18.0  # Claude 支持（可选）
+
+# 微信自动化
+wxauto>=3.9.0
+
+# 测试框架
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# 代码质量
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
+
+# ============================================
+# 可选依赖（按需安装）
+# ============================================
+
+# 企业级知识库（向量检索）
+# chromadb>=0.4.0           # 向量数据库（轻量级）
+# FlagEmbedding>=1.2.0      # BGE-M3嵌入模型（中文最佳）
+
+# 文档解析
+# pymupdf>=1.23.0           # PDF解析
+# python-docx>=0.8.11       # DOC/DOCX解析
+# paddleocr>=2.7.0          # OCR（中文识别）
+# paddlepaddle>=2.5.0       # PaddleOCR依赖
+
+# 高级RAG
+# rank-bm25>=0.2.2          # BM25算法
+# langchain>=0.1.0          # 文档分段工具
+
+# 企业微信（官方API，防封号）
+# wechatpy>=1.8.0           # 企业微信SDK
+
+# 大模型（Claude支持）
+# anthropic>=0.18.0         # 已在上面列出
+
+# ============================================
+# 安装建议
+# ============================================
+# 
+# 基础安装（必需）：
+#   pip install -r requirements.txt
+#
+# 企业级知识库（推荐）：
+#   pip install chromadb FlagEmbedding paddleocr pymupdf python-docx
+#
+# 企业微信（防封号）：
+#   pip install wechatpy
+#
+# 完整安装（全部功能）：
+#   pip install -r requirements.txt
+#   pip install chromadb FlagEmbedding paddleocr pymupdf python-docx wechatpy
+

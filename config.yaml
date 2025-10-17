@@ -1,0 +1,162 @@
+# 环境配置：dev | prod
+env: dev
+
+# LLM 配置
+llm:
+  primary: openai:gpt-4o-mini
+  fallback: deepseek:chat
+  timeout_ms: 6000
+  max_tokens: 512
+  temperature: 0.3
+  stream: true
+  system_prompt: |
+    你是一位专业的技术客服，负责解答产品相关问题。
+    - 回答简洁准确，≤400字
+    - 使用①②③分步骤说明
+    - 引用证据时标注文档名和版本
+    - 不确定时主动澄清，不可编造信息
+
+# 嵌入模型配置
+embedding:
+  model: bge-m3
+  batch_size: 32
+
+# RAG 配置
+rag:
+  bm25_topn: 50
+  top_k: 4
+  min_confidence: 0.75
+  medium_confidence: 0.55
+  rerank_model: bge-reranker-base
+
+# OCR 配置
+ocr:
+  provider_order:
+    - paddle_local
+    - cloud_ocr
+  timeout_ms: 3000
+
+# ASR 配置
+asr:
+  provider_order:
+    - wechat_builtin
+    - cloud_asr
+  timeout_ms: 5000
+
+# 速率限制
+rate_limit:
+  per_group_per_minute: 20
+  per_user_per_30s: 1
+  global_per_minute: 100
+
+# ACK 配置
+ack:
+  enabled: true
+  timeout_ms: 3000
+  message: "收到，处理中……"
+
+# 会话配置
+session:
+  ttl_minutes: 15
+  summary_max_length: 200
+  max_history_turns: 5
+
+# 响应配置
+response:
+  max_length: 400
+  split_threshold: 500
+  target_p95_ms: 10000
+
+# Token 预算
+budget:
+  avg_tokens_per_request: 1200
+  max_response_tokens: 400
+  max_evidence_tokens: 600
+
+# 置信度分流阈值
+confidence:
+  direct_answer: 0.75
+  clarification: 0.55
+  handoff: 0.55
+
+# 安全禁答域（关键词匹配）
+forbidden_topics:
+  - 价格
+  - 报价
+  - 合同
+  - 交付时间
+  - 法律
+  - 隐私
+  - 个人信息
+
+# 管理员配置
+admin:
+  names:
+    - 管理员
+    - 系统管理员
+  commands:
+    mute: "#mute"
+    unmute: "#unmute"
+    status: "#status"
+    debug_on: "#debug on"
+    debug_off: "#debug off"
+    add_kb: "#kb"
+    bind_customer: "#bind"
+
+# 日志配置
+logging:
+  level: INFO
+  format: json
+  file: logs/app.log
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# 数据库配置
+database:
+  path: data/data.db
+  backup_enabled: true
+  backup_interval_hours: 24
+
+# 密钥配置（仅从环境变量读取）
+secrets:
+  use_env: true
+  # 需要设置的环境变量：
+  # - OPENAI_API_KEY
+  # - DEEPSEEK_API_KEY
+  # - CLOUD_OCR_KEY（可选）
+  # - CLOUD_ASR_KEY（可选）
+
+# 微信配置
+wechat:
+  whitelisted_groups:
+    - 技术支持群
+    - VIP客户群
+  check_interval_ms: 500
+  max_retries: 3
+
+# 健康检查
+health:
+  enabled: true
+  test_group: 测试群
+  interval_minutes: 30
+  shadow_message: "[健康探针]"
+
+# 环境特定配置覆盖
+profiles:
+  dev:
+    llm:
+      max_tokens: 256
+      temperature: 0.2
+    logging:
+      level: DEBUG
+    rate_limit:
+      per_group_per_minute: 50
+  
+  prod:
+    llm:
+      max_tokens: 512
+      temperature: 0.3
+    logging:
+      level: INFO
+    database:
+      backup_enabled: true
