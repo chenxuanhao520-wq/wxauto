@@ -2,7 +2,15 @@
 演示脚本：展示客服中台的完整功能
 可在无真实微信环境下运行
 """
+
+# 强制 UTF-8 编码（解决中文显示问题）
 import sys
+import logging
+
+# 重新配置标准输出为 UTF-8
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))

@@ -3,11 +3,21 @@
 Phase 0-1: 实现监听、@识别、去重、频控、ACK、分流与落库
 Phase 3: 接入真实 AI 网关
 """
-import os
+
+# 强制 UTF-8 编码（解决中文显示问题）
 import sys
+import logging
+
+# 重新配置标准输出为 UTF-8
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
+# 配置日志为 UTF-8
+logging.basicConfig(encoding='utf-8', level=logging.INFO)
+
+import os
 import time
 import uuid
-import logging
 import yaml
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -22,6 +32,8 @@ from rag.retriever import Retriever, Evidence
 from ai_gateway.gateway import AIGateway
 from conversation_tracker import ConversationTracker, ConversationOutcome
 from adaptive_learning import UserProfiler, PersonalizedPromptGenerator, ContinuousLearner
+from customer_manager import customer_manager, init_default_groups
+from smart_analyzer import smart_analyzer
 
 # 确保日志目录存在
 Path("logs").mkdir(exist_ok=True)
@@ -54,6 +66,10 @@ class CustomerServiceBot:
         # 初始化组件
         self.db = Database(self.config['database']['path'])
         self.db.init_database()
+        
+        # 初始化客户管理系统
+        init_default_groups()
+        logger.info("客户管理系统已初始化")
         
         # 微信适配器
         whitelisted_groups = self.config['wechat']['whitelisted_groups']
@@ -244,7 +260,15 @@ class CustomerServiceBot:
                 )
                 logger.info(f"[{request_id[:8]}] ACK 发送: {'成功' if ack_success else '失败'}")
             
-            # Step 6: 会话管理
+            # Step 6: 客户管理
+            customer = self._get_or_create_customer(msg)
+            if not customer:
+                logger.warning(f"[{request_id[:8]}] 客户识别失败，跳过处理")
+                return
+            
+            logger.info(f"[{request_id[:8]}] 客户信息: {customer.customer_id} ({customer.name})")
+            
+            # Step 7: 会话管理
             session_key = f"{msg.group_id}:{msg.sender_id}"
             session = self.db.upsert_session(
                 session_key=session_key,
@@ -273,7 +297,7 @@ class CustomerServiceBot:
                 f"turn={session.turn_count}"
             )
             
-            # Step 7: RAG 检索
+            # Step 8: RAG 检索
             retrieval_start = time.time()
             evidences = self.retriever.retrieve(msg.content)
             confidence = self.retriever.calculate_confidence(evidences)
@@ -285,15 +309,32 @@ class CustomerServiceBot:
                 f"time={retrieval_time}ms"
             )
             
-            # Step 8: 置信度分流
-            branch = self._determine_branch(confidence)
+            # Step 9: 智能分析
+            analysis_start = time.time()
+            knowledge_result = {
+                'documents': [ev.content for ev in evidences],
+                'confidence': confidence,
+                'evidence_summary': '; '.join([ev.content[:100] + '...' for ev in evidences[:3]])
+            }
+            
+            analysis = smart_analyzer.deep_think_analysis(customer, msg.content, knowledge_result)
+            analysis_time = int((time.time() - analysis_start) * 1000)
+            
+            logger.info(
+                f"[{request_id[:8]}] 智能分析完成: "
+                f"type={analysis.question_type}, urgency={analysis.urgency_level}, "
+                f"complexity={analysis.complexity}, time={analysis_time}ms"
+            )
+            
+            # Step 10: 置信度分流（结合分析结果）
+            branch = self._determine_branch(confidence, analysis)
             
             logger.info(f"[{request_id[:8]}] 分流决策: branch={branch}, conf={confidence:.2f}")
             
-            # Step 9: 生成响应（当前为桩）
+            # Step 11: 生成智能响应
             generation_start = time.time()
-            response_text, llm_info = self._generate_response(
-                msg, evidences, confidence, branch, session
+            response_text, llm_info = self._generate_smart_response(
+                msg, customer, analysis, evidences, confidence, branch, session
             )
             generation_time = int((time.time() - generation_start) * 1000)
             
@@ -768,6 +809,116 @@ class CustomerServiceBot:
             tags.append('一般咨询')
         
         return tags
+    
+    def _get_or_create_customer(self, msg: Message):
+        """获取或创建客户"""
+        # 首先尝试根据姓名和群聊查找现有客户
+        customer = customer_manager.find_customer_by_name(msg.sender_name, msg.group_name)
+        
+        if customer:
+            # 更新客户活动
+            customer_manager.update_customer_activity(customer.customer_id)
+            return customer
+        
+        # 如果没有找到，创建新客户
+        try:
+            # 获取群聊分类
+            group_classification = customer_manager.get_group_classification(msg.group_name)
+            priority = group_classification.priority if group_classification else 3
+            
+            # 注册新客户
+            customer_id = customer_manager.register_customer(
+                name=msg.sender_name,
+                group_name=msg.group_name,
+                notes=f"自动注册 - 首次咨询",
+                priority=priority
+            )
+            
+            logger.info(f"新客户注册成功: {customer_id} ({msg.sender_name})")
+            return customer_manager.get_customer(customer_id)
+            
+        except Exception as e:
+            logger.error(f"客户注册失败: {e}")
+            return None
+    
+    def _determine_branch(self, confidence: float, analysis=None) -> str:
+        """确定分流策略"""
+        if analysis:
+            # 结合分析结果的智能分流
+            if analysis.needs_human or analysis.urgency_level >= 5:
+                return "handoff"
+            elif analysis.urgency_level >= 4 and confidence < 0.6:
+                return "clarification"
+            elif confidence >= 0.75:
+                return "direct_answer"
+            elif confidence >= 0.55:
+                return "clarification"
+            else:
+                return "handoff"
+        else:
+            # 原有的简单分流逻辑
+            if confidence >= 0.75:
+                return "direct_answer"
+            elif confidence >= 0.55:
+                return "clarification"
+            else:
+                return "handoff"
+    
+    def _generate_smart_response(self, msg: Message, customer, analysis, 
+                               evidences: List[Evidence], confidence: float, 
+                               branch: str, session) -> Tuple[str, Dict]:
+        """生成智能响应"""
+        try:
+            # 构建知识库结果
+            knowledge_result = {
+                'documents': [ev.content for ev in evidences],
+                'confidence': confidence,
+                'evidence_summary': '; '.join([ev.content[:100] + '...' for ev in evidences[:3]])
+            }
+            
+            # 生成智能回复
+            smart_response = smart_analyzer.generate_smart_response(
+                customer, msg.content, analysis, knowledge_result
+            )
+            
+            # 检查是否需要升级处理
+            if smart_analyzer.should_escalate(analysis, customer):
+                escalation_msg = smart_analyzer.get_escalation_message(customer, analysis)
+                response_text = f"{smart_response.response_text}\n\n{escalation_msg}"
+                
+                # 更新客户转人工次数
+                customer_manager.update_customer_activity(
+                    customer.customer_id, handoff=True
+                )
+            else:
+                response_text = smart_response.response_text
+            
+            # 更新客户活动
+            customer_manager.update_customer_activity(
+                customer.customer_id, 
+                question_solved=(branch == "direct_answer")
+            )
+            
+            # 模拟 LLM 信息
+            llm_info = {
+                "provider": "smart_analyzer",
+                "model": "enhanced_analysis",
+                "token_in": len(msg.content),
+                "token_out": len(response_text),
+                "latency_ms": 500  # 模拟延迟
+            }
+            
+            logger.info(
+                f"智能响应生成完成: type={smart_response.response_type}, "
+                f"confidence={smart_response.confidence:.2f}"
+            )
+            
+            return response_text, llm_info
+            
+        except Exception as e:
+            logger.error(f"智能响应生成失败: {e}")
+            # 降级到原有逻辑
+            return self._generate_response(msg, evidences, confidence, branch, session)
     
     def stop(self):
         """停止运行"""

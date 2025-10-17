@@ -1,474 +1,370 @@
+#!/usr/bin/env python3
 """
 飞书多维表格集成
-用于将消息日志同步到飞书多维表格，实现数据分析和可视化
+实现客户信息与飞书表格的自动同步
 """
+
+# 强制 UTF-8 编码
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
 import os
+import json
 import time
-import logging
-from typing import Dict, Any, List, Optional
-from datetime import datetime
+import requests
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Any
+from pathlib import Path
 
-logger = logging.getLogger(__name__)
+# 添加项目路径
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-
-class FeishuBitable:
-    """
-    飞书多维表格集成
+class FeishuBitableClient:
+    """飞书多维表格客户端"""
     
-    功能：
-    1. 自动同步消息日志到飞书表格
-    2. 支持批量写入
-    3. 支持字段映射配置
-    """
-    
-    def __init__(
-        self,
-        app_id: Optional[str] = None,
-        app_secret: Optional[str] = None,
-        bitable_token: Optional[str] = None,
-        table_id: Optional[str] = None
-    ):
+    def __init__(self, app_id: str = None, app_secret: str = None):
         """
-        初始化飞书多维表格客户端
+        初始化飞书客户端
         
         Args:
             app_id: 飞书应用 ID
             app_secret: 飞书应用密钥
-            bitable_token: 多维表格 token
-            table_id: 数据表 ID
         """
-        self.app_id = app_id or os.getenv("FEISHU_APP_ID")
-        self.app_secret = app_secret or os.getenv("FEISHU_APP_SECRET")
-        self.bitable_token = bitable_token or os.getenv("FEISHU_BITABLE_TOKEN")
-        self.table_id = table_id or os.getenv("FEISHU_TABLE_ID")
+        self.app_id = app_id or os.getenv('FEISHU_APP_ID')
+        self.app_secret = app_secret or os.getenv('FEISHU_APP_SECRET')
+        self.base_url = "https://open.feishu.cn/open-apis"
         
-        self.access_token: Optional[str] = None
-        self.token_expires_at: float = 0
+        self.access_token = None
+        self.token_expires_at = 0
         
-        if self.app_id and self.app_secret:
-            logger.info("飞书多维表格集成初始化成功")
-        else:
-            logger.warning("飞书多维表格未配置，功能不可用")
+        if not self.app_id or not self.app_secret:
+            print("警告: 飞书 App ID 或 App Secret 未配置")
     
-    def is_configured(self) -> bool:
-        """检查是否已配置"""
-        return all([self.app_id, self.app_secret, self.bitable_token, self.table_id])
-    
-    def _get_access_token(self) -> Optional[str]:
-        """
-        获取访问令牌
-        token 有效期 2 小时，自动缓存
-        """
+    def _get_access_token(self) -> str:
+        """获取访问令牌"""
+        # 检查令牌是否过期
         if self.access_token and time.time() < self.token_expires_at:
             return self.access_token
         
+        # 获取新令牌
+        url = f"{self.base_url}/auth/v3/tenant_access_token/internal"
+        payload = {
+            "app_id": self.app_id,
+            "app_secret": self.app_secret
+        }
+        
         try:
-            import requests
+            response = requests.post(url, json=payload)
+            data = response.json()
             
-            url = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
-            
-            payload = {
-                "app_id": self.app_id,
-                "app_secret": self.app_secret
-            }
-            
-            response = requests.post(url, json=payload, timeout=10)
-            result = response.json()
-            
-            if result.get("code") == 0:
-                self.access_token = result['tenant_access_token']
-                # token 有效期 2 小时，提前 10 分钟刷新
-                self.token_expires_at = time.time() + 7200 - 600
-                logger.info("飞书 access_token 获取成功")
+            if data.get('code') == 0:
+                self.access_token = data['tenant_access_token']
+                # 提前5分钟刷新令牌
+                self.token_expires_at = time.time() + data['expire'] - 300
                 return self.access_token
             else:
-                logger.error(f"飞书 access_token 获取失败: {result}")
+                print(f"获取飞书访问令牌失败: {data.get('msg')}")
                 return None
                 
         except Exception as e:
-            logger.error(f"获取飞书 access_token 异常: {e}")
+            print(f"获取飞书访问令牌异常: {e}")
             return None
     
-    def add_record(self, record: Dict[str, Any]) -> bool:
-        """
-        添加单条记录到飞书表格
+    def _make_request(self, method: str, endpoint: str, **kwargs) -> Optional[Dict]:
+        """发送API请求"""
+        token = self._get_access_token()
+        if not token:
+            return None
         
-        Args:
-            record: 记录数据，字段名需要与表格字段对应
-        
-        Returns:
-            bool: 是否成功
-        """
-        if not self.is_configured():
-            logger.warning("飞书多维表格未配置，跳过写入")
-            return False
-        
-        access_token = self._get_access_token()
-        if not access_token:
-            return False
-        
-        try:
-            import requests
-            
-            url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{self.bitable_token}/tables/{self.table_id}/records"
-            
-            headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json"
-            }
-            
-            # 转换记录格式
-            fields = self._convert_record(record)
-            
-            payload = {
-                "fields": fields
-            }
-            
-            response = requests.post(url, headers=headers, json=payload, timeout=10)
-            result = response.json()
-            
-            if result.get("code") == 0:
-                logger.info(f"飞书表格写入成功: record_id={result['data']['record']['record_id']}")
-                return True
-            else:
-                logger.error(f"飞书表格写入失败: {result}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"飞书表格写入异常: {e}")
-            return False
-    
-    def add_records(self, records: List[Dict[str, Any]]) -> bool:
-        """
-        批量添加记录到飞书表格
-        
-        Args:
-            records: 记录列表
-        
-        Returns:
-            bool: 是否成功
-        """
-        if not self.is_configured():
-            logger.warning("飞书多维表格未配置，跳过写入")
-            return False
-        
-        if not records:
-            return True
-        
-        access_token = self._get_access_token()
-        if not access_token:
-            return False
-        
-        try:
-            import requests
-            
-            url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{self.bitable_token}/tables/{self.table_id}/records/batch_create"
-            
-            headers = {
-                "Authorization": f"Bearer {access_token}",
-                "Content-Type": "application/json"
-            }
-            
-            # 转换记录格式
-            records_data = [
-                {"fields": self._convert_record(record)}
-                for record in records
-            ]
-            
-            payload = {
-                "records": records_data
-            }
-            
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
-            result = response.json()
-            
-            if result.get("code") == 0:
-                logger.info(f"飞书表格批量写入成功: {len(records)} 条记录")
-                return True
-            else:
-                logger.error(f"飞书表格批量写入失败: {result}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"飞书表格批量写入异常: {e}")
-            return False
-    
-    def _convert_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        转换记录格式，适配飞书多维表格字段类型
-        
-        Args:
-            record: 原始记录
-        
-        Returns:
-            转换后的字段数据
-        """
-        fields = {}
-        
-        # 字段映射和类型转换
-        field_mapping = {
-            'request_id': '请求ID',
-            'session_id': '会话ID',
-            'group_name': '群名称',
-            'sender_name': '发送者',
-            'user_message': '用户消息',
-            'bot_response': 'AI回复',
-            'confidence': '置信度',
-            'branch': '分支',
-            'provider': 'AI提供商',
-            'model': '模型',
-            'token_total': 'Token总数',
-            'latency_total_ms': '总时延(ms)',
-            'status': '状态',
-            'received_at': '接收时间',
-            'responded_at': '响应时间'
+        url = f"{self.base_url}{endpoint}"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
         }
         
-        for src_key, dst_key in field_mapping.items():
-            if src_key in record and record[src_key] is not None:
-                value = record[src_key]
-                
-                # 时间格式转换
-                if src_key in ['received_at', 'responded_at']:
-                    if isinstance(value, datetime):
-                        value = int(value.timestamp() * 1000)
-                    elif isinstance(value, str):
-                        try:
-                            dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                            value = int(dt.timestamp() * 1000)
-                        except:
-                            value = None
-                
-                if value is not None:
-                    fields[dst_key] = value
-        
-        return fields
-    
-    def sync_conversations_from_database(self, db_path: str, since: Optional[datetime] = None) -> int:
-        """
-        从数据库同步对话级别数据到飞书表格
-        
-        Args:
-            db_path: 数据库路径
-            since: 起始时间（可选）
-        
-        Returns:
-            int: 同步的对话数
-        """
-        if not self.is_configured():
-            logger.warning("飞书多维表格未配置，跳过同步")
-            return 0
-        
         try:
-            import sqlite3
+            response = requests.request(method, url, headers=headers, **kwargs)
+            data = response.json()
             
-            conn = sqlite3.connect(db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            # 查询对话级别数据
-            query = """
-                SELECT 
-                    session_key, group_name, sender_name, customer_name,
-                    conversation_outcome, outcome_reason, resolved_by,
-                    satisfaction_score, tags, turn_count, total_messages,
-                    ai_messages, resolution_time_sec, conversation_thread,
-                    created_at, last_active_at
-                FROM sessions
-                WHERE 1=1
-            """
-            params = []
-            
-            if since:
-                query += " AND created_at >= ?"
-                params.append(since)
-            
-            query += " ORDER BY created_at DESC LIMIT 1000"
-            
-            cursor.execute(query, params)
-            rows = cursor.fetchall()
-            
-            conn.close()
-            
-            if not rows:
-                logger.info("没有需要同步的对话")
-                return 0
-            
-            # 转换为字典列表
-            conversations = []
-            for row in rows:
-                conv = {
-                    'session_key': row['session_key'],
-                    'group_name': row['group_name'],
-                    'sender_name': row['sender_name'],
-                    'customer_name': row['customer_name'],
-                    'conversation_outcome': row['conversation_outcome'],
-                    'outcome_reason': row['outcome_reason'],
-                    'resolved_by': row['resolved_by'],
-                    'satisfaction_score': row['satisfaction_score'],
-                    'tags': row['tags'],
-                    'turn_count': row['turn_count'],
-                    'total_messages': row['total_messages'],
-                    'ai_messages': row['ai_messages'],
-                    'resolution_time_sec': row['resolution_time_sec'],
-                    'conversation_thread': row['conversation_thread'],
-                    'created_at': row['created_at'],
-                    'last_active_at': row['last_active_at']
-                }
-                conversations.append(conv)
-            
-            # 批量写入（每批 500 条）
-            batch_size = 500
-            total_synced = 0
-            
-            for i in range(0, len(conversations), batch_size):
-                batch = conversations[i:i + batch_size]
-                records = [self._convert_conversation_record(conv) for conv in batch]
+            if data.get('code') == 0:
+                return data.get('data')
+            else:
+                print(f"飞书API请求失败: {data.get('msg')}")
+                return None
                 
-                if self.add_records(records):
-                    total_synced += len(batch)
-                else:
-                    logger.error(f"批次 {i // batch_size + 1} 同步失败")
-            
-            logger.info(f"飞书表格对话同步完成: {total_synced}/{len(conversations)} 条")
-            return total_synced
-            
         except Exception as e:
-            logger.error(f"飞书表格对话同步异常: {e}")
-            return 0
+            print(f"飞书API请求异常: {e}")
+            return None
     
-    def _convert_conversation_record(self, conversation: Dict[str, Any]) -> Dict[str, Any]:
+    def get_records(self, app_token: str, table_id: str, 
+                   view_id: str = None, page_size: int = 100) -> List[Dict]:
         """
-        转换对话记录格式
+        获取表格记录
         
         Args:
-            conversation: 对话数据
-        
+            app_token: 多维表格 Token
+            table_id: 表格 ID
+            view_id: 视图 ID（可选）
+            page_size: 每页记录数
+            
         Returns:
-            转换后的字段数据
+            记录列表
         """
-        fields = {}
+        endpoint = f"/bitable/v1/apps/{app_token}/tables/{table_id}/records"
+        params = {"page_size": page_size}
         
-        # 字段映射
-        field_mapping = {
-            'session_key': '会话ID',
-            'group_name': '群名称',
-            'sender_name': '用户',
-            'customer_name': '客户名称',
-            'conversation_outcome': '对话结果',
-            'outcome_reason': '结果说明',
-            'resolved_by': '解决方式',
-            'satisfaction_score': '满意度',
-            'tags': '标签',
-            'turn_count': '对话轮数',
-            'total_messages': '总消息数',
-            'ai_messages': 'AI消息数',
-            'resolution_time_sec': '解决用时(秒)',
-            'conversation_thread': '完整对话',
-            'created_at': '开始时间',
-            'last_active_at': '结束时间'
-        }
+        if view_id:
+            params['view_id'] = view_id
         
-        for src_key, dst_key in field_mapping.items():
-            if src_key in conversation and conversation[src_key] is not None:
-                value = conversation[src_key]
-                
-                # 时间格式转换
-                if src_key in ['created_at', 'last_active_at']:
-                    if isinstance(value, datetime):
-                        value = int(value.timestamp() * 1000)
-                    elif isinstance(value, str):
-                        try:
-                            dt = datetime.fromisoformat(value.replace('Z', '+00:00'))
-                            value = int(dt.timestamp() * 1000)
-                        except:
-                            value = None
-                
-                # 对话串转换为文本
-                elif src_key == 'conversation_thread' and value:
-                    try:
-                        import json
-                        thread = json.loads(value) if isinstance(value, str) else value
-                        lines = []
-                        for msg in thread:
-                            role = "用户" if msg['role'] == 'user' else "AI"
-                            lines.append(f"{role}: {msg['content']}")
-                        value = "\n".join(lines)
-                    except:
-                        value = str(value)
-                
-                if value is not None:
-                    fields[dst_key] = value
+        all_records = []
+        has_more = True
+        page_token = None
         
-        return fields
+        while has_more:
+            if page_token:
+                params['page_token'] = page_token
+            
+            data = self._make_request('GET', endpoint, params=params)
+            if not data:
+                break
+            
+            records = data.get('items', [])
+            all_records.extend(records)
+            
+            has_more = data.get('has_more', False)
+            page_token = data.get('page_token')
+        
+        return all_records
     
-    def sync_from_database(self, db_path: str, since: Optional[datetime] = None) -> int:
+    def add_record(self, app_token: str, table_id: str, fields: Dict) -> Optional[Dict]:
         """
-        从数据库同步记录到飞书表格
+        添加记录
         
         Args:
-            db_path: 数据库路径
-            since: 起始时间（可选），只同步此时间之后的记录
-        
+            app_token: 多维表格 Token
+            table_id: 表格 ID
+            fields: 字段数据
+            
         Returns:
-            int: 同步的记录数
+            新记录信息
         """
-        if not self.is_configured():
-            logger.warning("飞书多维表格未配置，跳过同步")
-            return 0
+        endpoint = f"/bitable/v1/apps/{app_token}/tables/{table_id}/records"
+        payload = {"fields": fields}
         
-        try:
-            import sqlite3
+        return self._make_request('POST', endpoint, json=payload)
+    
+    def update_record(self, app_token: str, table_id: str, 
+                     record_id: str, fields: Dict) -> Optional[Dict]:
+        """
+        更新记录
+        
+        Args:
+            app_token: 多维表格 Token
+            table_id: 表格 ID
+            record_id: 记录 ID
+            fields: 字段数据
             
-            conn = sqlite3.connect(db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+        Returns:
+            更新后的记录信息
+        """
+        endpoint = f"/bitable/v1/apps/{app_token}/tables/{table_id}/records/{record_id}"
+        payload = {"fields": fields}
+        
+        return self._make_request('PUT', endpoint, json=payload)
+    
+    def batch_update_records(self, app_token: str, table_id: str, 
+                           records: List[Dict]) -> Optional[Dict]:
+        """
+        批量更新记录
+        
+        Args:
+            app_token: 多维表格 Token
+            table_id: 表格 ID
+            records: 记录列表，每个记录包含 record_id 和 fields
             
-            # 构建查询
-            query = """
-                SELECT 
-                    request_id, session_id, group_name, sender_name,
-                    user_message, bot_response, confidence, branch,
-                    provider, model, token_total, latency_total_ms,
-                    status, received_at, responded_at
-                FROM messages
-                WHERE 1=1
-            """
-            params = []
+        Returns:
+            更新结果
+        """
+        endpoint = f"/bitable/v1/apps/{app_token}/tables/{table_id}/records/batch_update"
+        payload = {"records": records}
+        
+        return self._make_request('POST', endpoint, json=payload)
+    
+    def search_records(self, app_token: str, table_id: str, 
+                      field_name: str, field_value: str) -> List[Dict]:
+        """
+        搜索记录
+        
+        Args:
+            app_token: 多维表格 Token
+            table_id: 表格 ID
+            field_name: 字段名
+            field_value: 字段值
             
-            if since:
-                query += " AND received_at >= ?"
-                params.append(since)
-            
-            query += " ORDER BY received_at DESC LIMIT 1000"
-            
-            cursor.execute(query, params)
-            rows = cursor.fetchall()
-            
-            conn.close()
-            
-            if not rows:
-                logger.info("没有需要同步的记录")
-                return 0
-            
-            # 转换为字典列表
-            records = [dict(row) for row in rows]
-            
-            # 批量写入（每批 500 条）
-            batch_size = 500
-            total_synced = 0
-            
-            for i in range(0, len(records), batch_size):
-                batch = records[i:i + batch_size]
-                if self.add_records(batch):
-                    total_synced += len(batch)
-                else:
-                    logger.error(f"批次 {i // batch_size + 1} 同步失败")
-            
-            logger.info(f"飞书表格同步完成: {total_synced}/{len(records)} 条记录")
-            return total_synced
-            
-        except Exception as e:
-            logger.error(f"飞书表格同步异常: {e}")
-            return 0
+        Returns:
+            匹配的记录列表
+        """
+        all_records = self.get_records(app_token, table_id)
+        
+        matching_records = []
+        for record in all_records:
+            fields = record.get('fields', {})
+            if fields.get(field_name) == field_value:
+                matching_records.append(record)
+        
+        return matching_records
 
+class CustomerBitableSync:
+    """客户信息与飞书表格同步"""
+    
+    def __init__(self, client: FeishuBitableClient):
+        self.client = client
+        self.app_token = os.getenv('FEISHU_BITABLE_TOKEN')
+        self.table_id = os.getenv('FEISHU_TABLE_ID')
+        
+        if not self.app_token or not self.table_id:
+            print("警告: 飞书多维表格 Token 或 Table ID 未配置")
+    
+    def sync_customers_from_feishu(self) -> List[Dict]:
+        """
+        从飞书同步客户信息
+        
+        Returns:
+            客户信息列表
+        """
+        if not self.app_token or not self.table_id:
+            print("飞书表格未配置，跳过同步")
+            return []
+        
+        try:
+            records = self.client.get_records(self.app_token, self.table_id)
+            
+            customers = []
+            for record in records:
+                fields = record.get('fields', {})
+                
+                # 提取客户信息（根据实际表格字段调整）
+                customer = {
+                    'record_id': record.get('record_id'),
+                    'customer_id': fields.get('客户编号') or fields.get('编号'),
+                    'name': fields.get('姓名') or fields.get('客户名称'),
+                    'group_name': fields.get('群聊名称') or fields.get('所属群聊'),
+                    'wechat_remark': fields.get('微信备注'),
+                    'priority': fields.get('优先级', 3),
+                    'notes': fields.get('备注', ''),
+                    'phone': fields.get('电话'),
+                    'email': fields.get('邮箱'),
+                    'tags': fields.get('标签', [])
+                }
+                
+                # 过滤掉必填字段为空的记录
+                if customer['customer_id'] and customer['name']:
+                    customers.append(customer)
+            
+            print(f"从飞书同步了 {len(customers)} 个客户")
+            return customers
+            
+        except Exception as e:
+            print(f"从飞书同步客户失败: {e}")
+            return []
+    
+    def sync_customer_to_feishu(self, customer_data: Dict) -> bool:
+        """
+        同步客户信息到飞书
+        
+        Args:
+            customer_data: 客户数据
+            
+        Returns:
+            是否成功
+        """
+        if not self.app_token or not self.table_id:
+            return False
+        
+        try:
+            # 检查客户是否已存在
+            existing_records = self.client.search_records(
+                self.app_token, self.table_id,
+                '客户编号', customer_data.get('customer_id')
+            )
+            
+            # 构建字段数据
+            fields = {
+                '客户编号': customer_data.get('customer_id'),
+                '姓名': customer_data.get('name'),
+                '群聊名称': customer_data.get('group_name'),
+                '微信备注': customer_data.get('wechat_remark', customer_data.get('name')),
+                '优先级': customer_data.get('priority', 3),
+                '备注': customer_data.get('notes', ''),
+                '总问题数': customer_data.get('total_questions', 0),
+                '已解决': customer_data.get('solved_questions', 0),
+                '转人工次数': customer_data.get('handoff_count', 0),
+                '最后活跃': customer_data.get('last_active'),
+                '同步时间': datetime.now().isoformat()
+            }
+            
+            if existing_records:
+                # 更新现有记录
+                record_id = existing_records[0]['record_id']
+                result = self.client.update_record(
+                    self.app_token, self.table_id, record_id, fields
+                )
+                print(f"更新飞书记录: {customer_data.get('customer_id')}")
+            else:
+                # 添加新记录
+                result = self.client.add_record(
+                    self.app_token, self.table_id, fields
+                )
+                print(f"添加飞书记录: {customer_data.get('customer_id')}")
+            
+            return result is not None
+            
+        except Exception as e:
+            print(f"同步客户到飞书失败: {e}")
+            return False
+    
+    def batch_sync_to_feishu(self, customers: List[Dict]) -> Dict[str, int]:
+        """
+        批量同步客户到飞书
+        
+        Args:
+            customers: 客户列表
+            
+        Returns:
+            同步统计信息
+        """
+        stats = {'success': 0, 'failed': 0}
+        
+        for customer in customers:
+            if self.sync_customer_to_feishu(customer):
+                stats['success'] += 1
+            else:
+                stats['failed'] += 1
+            
+            # 避免API频率限制
+            time.sleep(0.1)
+        
+        return stats
+
+# 全局实例
+feishu_client = FeishuBitableClient()
+feishu_sync = CustomerBitableSync(feishu_client)
+
+if __name__ == "__main__":
+    # 测试飞书集成
+    print("🧪 测试飞书多维表格集成...")
+    
+    # 测试连接
+    token = feishu_client._get_access_token()
+    if token:
+        print(f"✅ 飞书访问令牌获取成功: {token[:20]}...")
+        
+        # 测试同步
+        customers = feishu_sync.sync_customers_from_feishu()
+        print(f"📊 同步了 {len(customers)} 个客户")
+        
+        for customer in customers[:3]:  # 显示前3个
+            print(f"   {customer.get('customer_id')}: {customer.get('name')}")
+    else:
+        print("❌ 飞书访问令牌获取失败")

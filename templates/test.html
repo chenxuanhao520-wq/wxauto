@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}功能测试 - 微信客服中台{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-bug"></i> 功能测试</h1>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-chat"></i> 发送测试消息</h5>
+            </div>
+            <div class="card-body">
+                <form id="test-message-form">
+                    <div class="mb-3">
+                        <label class="form-label">群聊名称</label>
+                        <input type="text" class="form-control" id="test-group" value="技术支持群" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">发送者</label>
+                        <input type="text" class="form-control" id="test-sender" value="测试用户" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">消息内容</label>
+                        <textarea class="form-control" id="test-content" rows="3" required>@小助手 这是一个测试消息，请回复我。</textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> 发送测试消息
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-check"></i> 测试结果</h5>
+            </div>
+            <div class="card-body">
+                <div id="test-results">
+                    <p class="text-muted">暂无测试结果</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-gear"></i> 快速测试</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="quickTest('普通问题')">
+                        <i class="bi bi-question-circle"></i> 普通问题测试
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="quickTest('禁答域问题')">
+                        <i class="bi bi-exclamation-triangle"></i> 禁答域测试
+                    </button>
+                    <button class="btn btn-outline-info" onclick="quickTest('管理指令')">
+                        <i class="bi bi-tools"></i> 管理指令测试
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-activity"></i> 实时日志</h5>
+            </div>
+            <div class="card-body">
+                <div id="test-logs" style="height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                    <p class="text-muted">等待测试消息...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const socket = io();
+    
+    // 连接成功
+    socket.on('connect', function() {
+        addLog('✅ WebSocket 连接成功', 'success');
+    });
+    
+    // 接收测试消息发送事件
+    socket.on('test_message_sent', function(data) {
+        addLog(`📤 测试消息已发送: ${data.sender} -> ${data.content}`, 'info');
+    });
+    
+    // 提交测试消息表单
+    document.getElementById('test-message-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const testData = {
+            group: document.getElementById('test-group').value,
+            sender: document.getElementById('test-sender').value,
+            content: document.getElementById('test-content').value
+        };
+        
+        sendTestMessage(testData);
+    });
+    
+    // 发送测试消息
+    function sendTestMessage(data) {
+        addLog(`🔄 发送测试消息: ${data.sender} -> ${data.group}`, 'info');
+        
+        fetch('/api/test/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                addLog(`✅ ${result.message}`, 'success');
+                addTestResult('success', `消息发送成功: ${data.content}`);
+            } else {
+                addLog(`❌ ${result.message}`, 'danger');
+                addTestResult('error', `消息发送失败: ${result.message}`);
+            }
+        })
+        .catch(error => {
+            addLog(`❌ 发送失败: ${error.message}`, 'danger');
+            addTestResult('error', `发送失败: ${error.message}`);
+        });
+    }
+    
+    // 快速测试
+    function quickTest(type) {
+        const tests = {
+            '普通问题': {
+                group: '技术支持群',
+                sender: '测试用户',
+                content: '@小助手 如何安装设备？'
+            },
+            '禁答域问题': {
+                group: '技术支持群',
+                sender: '测试用户',
+                content: '@小助手 你们的价格是多少？'
+            },
+            '管理指令': {
+                group: '技术支持群',
+                sender: '管理员',
+                content: '@小助手 #status'
+            }
+        };
+        
+        const testData = tests[type];
+        if (testData) {
+            // 更新表单
+            document.getElementById('test-group').value = testData.group;
+            document.getElementById('test-sender').value = testData.sender;
+            document.getElementById('test-content').value = testData.content;
+            
+            // 发送测试
+            sendTestMessage(testData);
+        }
+    }
+    
+    // 添加日志
+    function addLog(message, type = 'info') {
+        const logsDiv = document.getElementById('test-logs');
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        logEntry.className = `mb-1 text-${type}`;
+        logEntry.innerHTML = `<small>[${timestamp}]</small> ${message}`;
+        
+        logsDiv.appendChild(logEntry);
+        logsDiv.scrollTop = logsDiv.scrollHeight;
+        
+        // 限制日志条数
+        while (logsDiv.children.length > 50) {
+            logsDiv.removeChild(logsDiv.firstChild);
+        }
+    }
+    
+    // 添加测试结果
+    function addTestResult(type, message) {
+        const resultsDiv = document.getElementById('test-results');
+        const resultEntry = document.createElement('div');
+        resultEntry.className = `alert alert-${type} alert-sm mb-2`;
+        resultEntry.innerHTML = `
+            <small><strong>[${new Date().toLocaleTimeString()}]</strong></small><br>
+            ${message}
+        `;
+        
+        resultsDiv.appendChild(resultEntry);
+        
+        // 限制结果条数
+        while (resultsDiv.children.length > 10) {
+            resultsDiv.removeChild(resultsDiv.firstChild);
+        }
+    }
+</script>
+{% endblock %}

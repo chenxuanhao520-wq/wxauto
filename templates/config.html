@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+{% block title %}配置管理 - 微信客服中台{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-gear"></i> 配置管理</h1>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card config-section">
+            <div class="card-header">
+                <h5><i class="bi bi-key"></i> API 密钥配置</h5>
+            </div>
+            <div class="card-body">
+                <form id="api-keys-form">
+                    <div class="mb-3">
+                        <label class="form-label">OpenAI API Key</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control key-input" id="openai-key" placeholder="sk-...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('openai-key')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">DeepSeek API Key</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control key-input" id="deepseek-key" placeholder="sk-...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('deepseek-key')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">通义千问 API Key</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control key-input" id="qwen-key" placeholder="sk-...">
+                            <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('qwen-key')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check"></i> 保存 API 密钥
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card config-section">
+            <div class="card-header">
+                <h5><i class="bi bi-table"></i> 飞书多维表格</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">飞书 App ID</label>
+                    <input type="text" class="form-control key-input" id="feishu-app-id" placeholder="cli_...">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">飞书 App Secret</label>
+                    <input type="password" class="form-control key-input" id="feishu-app-secret">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">多维表格 Token</label>
+                    <input type="text" class="form-control key-input" id="feishu-bitable-token" placeholder="bascn...">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">表格 ID</label>
+                    <input type="text" class="form-control key-input" id="feishu-table-id" placeholder="tbl...">
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="saveFeishuConfig()">
+                    <i class="bi bi-check"></i> 保存飞书配置
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card config-section">
+            <div class="card-header">
+                <h5><i class="bi bi-table"></i> 钉钉多维表格</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">钉钉 App Key</label>
+                    <input type="text" class="form-control key-input" id="dingtalk-app-key" placeholder="dingtalk...">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">钉钉 App Secret</label>
+                    <input type="password" class="form-control key-input" id="dingtalk-app-secret">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Base ID</label>
+                    <input type="text" class="form-control key-input" id="dingtalk-base-id">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">表格 ID</label>
+                    <input type="text" class="form-control key-input" id="dingtalk-table-id">
+                </div>
+                
+                <button type="button" class="btn btn-primary" onclick="saveDingtalkConfig()">
+                    <i class="bi bi-check"></i> 保存钉钉配置
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card config-section">
+            <div class="card-header">
+                <h5><i class="bi bi-sliders"></i> 系统配置</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">白名单群聊</label>
+                    <textarea class="form-control" id="whitelisted-groups" rows="3" placeholder="每行一个群名"></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">检查间隔 (秒)</label>
+                    <input type="number" class="form-control" id="check-interval" value="0.5" min="0.1" max="10" step="0.1">
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">最大 Token 数</label>
+                    <input type="number" class="form-control" id="max-tokens" value="512" min="100" max="4000">
+                </div>
+                
+                <button type="button" class="btn btn-success" onclick="saveSystemConfig()">
+                    <i class="bi bi-check"></i> 保存系统配置
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 提示消息 -->
+<div id="alert-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 加载现有配置
+    document.addEventListener('DOMContentLoaded', function() {
+        loadApiKeys();
+        loadSystemConfig();
+    });
+    
+    // 加载 API 密钥
+    function loadApiKeys() {
+        fetch('/api/keys')
+            .then(response => response.json())
+            .then(data => {
+                if (data.OPENAI_API_KEY) {
+                    document.getElementById('openai-key').value = data.OPENAI_API_KEY.value;
+                }
+                if (data.DEEPSEEK_API_KEY) {
+                    document.getElementById('deepseek-key').value = data.DEEPSEEK_API_KEY.value;
+                }
+                if (data.QWEN_API_KEY) {
+                    document.getElementById('qwen-key').value = data.QWEN_API_KEY.value;
+                }
+                if (data.FEISHU_APP_ID) {
+                    document.getElementById('feishu-app-id').value = data.FEISHU_APP_ID.value;
+                }
+                if (data.FEISHU_APP_SECRET) {
+                    document.getElementById('feishu-app-secret').value = data.FEISHU_APP_SECRET.value;
+                }
+                if (data.FEISHU_BITABLE_TOKEN) {
+                    document.getElementById('feishu-bitable-token').value = data.FEISHU_BITABLE_TOKEN.value;
+                }
+                if (data.FEISHU_TABLE_ID) {
+                    document.getElementById('feishu-table-id').value = data.FEISHU_TABLE_ID.value;
+                }
+                if (data.DINGTALK_APP_KEY) {
+                    document.getElementById('dingtalk-app-key').value = data.DINGTALK_APP_KEY.value;
+                }
+                if (data.DINGTALK_APP_SECRET) {
+                    document.getElementById('dingtalk-app-secret').value = data.DINGTALK_APP_SECRET.value;
+                }
+                if (data.DINGTALK_BASE_ID) {
+                    document.getElementById('dingtalk-base-id').value = data.DINGTALK_BASE_ID.value;
+                }
+                if (data.DINGTALK_TABLE_ID) {
+                    document.getElementById('dingtalk-table-id').value = data.DINGTALK_TABLE_ID.value;
+                }
+            })
+            .catch(error => {
+                showAlert('加载配置失败: ' + error.message, 'danger');
+            });
+    }
+    
+    // 加载系统配置
+    function loadSystemConfig() {
+        fetch('/api/config')
+            .then(response => response.json())
+            .then(data => {
+                if (data.wechat && data.wechat.whitelisted_groups) {
+                    document.getElementById('whitelisted-groups').value = data.wechat.whitelisted_groups.join('\n');
+                }
+                if (data.wechat && data.wechat.check_interval_ms) {
+                    document.getElementById('check-interval').value = data.wechat.check_interval_ms / 1000;
+                }
+                if (data.llm && data.llm.max_tokens) {
+                    document.getElementById('max-tokens').value = data.llm.max_tokens;
+                }
+            });
+    }
+    
+    // 保存 API 密钥
+    document.getElementById('api-keys-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const keys = {
+            'OPENAI_API_KEY': document.getElementById('openai-key').value,
+            'DEEPSEEK_API_KEY': document.getElementById('deepseek-key').value,
+            'QWEN_API_KEY': document.getElementById('qwen-key').value
+        };
+        
+        for (const [key, value] of Object.entries(keys)) {
+            if (value) {
+                saveApiKey(key, value);
+            }
+        }
+    });
+    
+    // 保存单个 API 密钥
+    function saveApiKey(keyName, keyValue) {
+        fetch('/api/keys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                key: keyName,
+                value: keyValue
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('保存失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 保存飞书配置
+    function saveFeishuConfig() {
+        const config = {
+            'FEISHU_APP_ID': document.getElementById('feishu-app-id').value,
+            'FEISHU_APP_SECRET': document.getElementById('feishu-app-secret').value,
+            'FEISHU_BITABLE_TOKEN': document.getElementById('feishu-bitable-token').value,
+            'FEISHU_TABLE_ID': document.getElementById('feishu-table-id').value
+        };
+        
+        for (const [key, value] of Object.entries(config)) {
+            if (value) {
+                saveApiKey(key, value);
+            }
+        }
+    }
+    
+    // 保存钉钉配置
+    function saveDingtalkConfig() {
+        const config = {
+            'DINGTALK_APP_KEY': document.getElementById('dingtalk-app-key').value,
+            'DINGTALK_APP_SECRET': document.getElementById('dingtalk-app-secret').value,
+            'DINGTALK_BASE_ID': document.getElementById('dingtalk-base-id').value,
+            'DINGTALK_TABLE_ID': document.getElementById('dingtalk-table-id').value
+        };
+        
+        for (const [key, value] of Object.entries(config)) {
+            if (value) {
+                saveApiKey(key, value);
+            }
+        }
+    }
+    
+    // 保存系统配置
+    function saveSystemConfig() {
+        const groups = document.getElementById('whitelisted-groups').value.split('\n').filter(g => g.trim());
+        const config = {
+            wechat: {
+                whitelisted_groups: groups,
+                check_interval_ms: parseFloat(document.getElementById('check-interval').value) * 1000
+            },
+            llm: {
+                max_tokens: parseInt(document.getElementById('max-tokens').value)
+            }
+        };
+        
+        fetch('/api/config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(config)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(data.message, 'success');
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('保存失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 切换密码可见性
+    function toggleVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        const button = input.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+    
+    // 显示提示消息
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+</script>
+{% endblock %}

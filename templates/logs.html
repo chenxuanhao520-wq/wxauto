@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}消息日志 - 微信客服中台{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-chat-text"></i> 消息日志</h1>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list"></i> 消息记录</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>发送者</th>
+                                <th>用户消息</th>
+                                <th>机器人回复</th>
+                                <th>置信度</th>
+                                <th>状态</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messages-table">
+                            <tr>
+                                <td colspan="7" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 分页 -->
+                <nav>
+                    <ul class="pagination justify-content-center" id="pagination">
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentPage = 1;
+    const perPage = 20;
+    
+    // 加载消息日志
+    function loadMessages(page = 1) {
+        fetch(`/api/logs?page=${page}&per_page=${perPage}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                displayMessages(data.messages);
+                updatePagination(data.total, page, perPage);
+                currentPage = page;
+            })
+            .catch(error => {
+                console.error('加载消息失败:', error);
+                document.getElementById('messages-table').innerHTML = 
+                    '<tr><td colspan="7" class="text-center text-danger">加载失败: ' + error.message + '</td></tr>';
+            });
+    }
+    
+    // 显示消息
+    function displayMessages(messages) {
+        const tbody = document.getElementById('messages-table');
+        
+        if (messages.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">暂无消息记录</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = messages.map(msg => `
+            <tr>
+                <td>${msg.id}</td>
+                <td>${msg.sender || '未知'}</td>
+                <td title="${msg.user_message}">${msg.user_message.substring(0, 30)}${msg.user_message.length > 30 ? '...' : ''}</td>
+                <td title="${msg.bot_response}">${msg.bot_response ? msg.bot_response.substring(0, 30) + (msg.bot_response.length > 30 ? '...' : '') : '-'}</td>
+                <td>${msg.confidence ? msg.confidence.toFixed(2) : '-'}</td>
+                <td><span class="badge bg-${getStatusColor(msg.status)}">${msg.status || '未知'}</span></td>
+                <td>${new Date(msg.received_at).toLocaleString()}</td>
+            </tr>
+        `).join('');
+    }
+    
+    // 获取状态颜色
+    function getStatusColor(status) {
+        switch(status) {
+            case 'answered': return 'success';
+            case 'handoff': return 'warning';
+            case 'error': return 'danger';
+            default: return 'secondary';
+        }
+    }
+    
+    // 更新分页
+    function updatePagination(total, currentPage, perPage) {
+        const totalPages = Math.ceil(total / perPage);
+        const pagination = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let paginationHTML = '';
+        
+        // 上一页
+        if (currentPage > 1) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="loadMessages(${currentPage - 1})">上一页</a></li>`;
+        }
+        
+        // 页码
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHTML += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="loadMessages(${i})">${i}</a>
+            </li>`;
+        }
+        
+        // 下一页
+        if (currentPage < totalPages) {
+            paginationHTML += `<li class="page-item"><a class="page-link" href="#" onclick="loadMessages(${currentPage + 1})">下一页</a></li>`;
+        }
+        
+        pagination.innerHTML = paginationHTML;
+    }
+    
+    // 页面加载时获取消息
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMessages(1);
+    });
+</script>
+{% endblock %}

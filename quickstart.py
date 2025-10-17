@@ -3,7 +3,15 @@
 快速启动脚本
 自动检查环境、初始化数据库、运行测试与演示
 """
+
+# 强制 UTF-8 编码（解决中文显示问题）
 import sys
+import logging
+
+# 重新配置标准输出为 UTF-8
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
 import os
 from pathlib import Path
 

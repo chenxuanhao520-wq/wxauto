@@ -2,7 +2,12 @@
 """
 运维工具：健康检查、日志轮转、性能统计
 """
+
+# 强制 UTF-8 编码
 import sys
+sys.stdout.reconfigure(encoding='utf-8')
+sys.stderr.reconfigure(encoding='utf-8')
+
 import os
 import argparse
 import logging

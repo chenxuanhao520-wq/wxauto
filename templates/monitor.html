@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}系统监控 - 微信客服中台{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-graph-up"></i> 系统监控</h1>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card status-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">今日消息</h5>
+                <h2 id="monitor-messages-today">-</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card success-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">活跃会话</h5>
+                <h2 id="monitor-active-sessions">-</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card warning-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">AI 状态</h5>
+                <h2 id="monitor-ai-status">-</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card danger-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">知识库</h5>
+                <h2 id="monitor-kb-count">-</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-activity"></i> 实时状态</h5>
+            </div>
+            <div class="card-body">
+                <div id="real-time-status">
+                    <p class="text-muted">连接中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> 系统信息</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><strong>运行时间:</strong> <span id="uptime">-</span></li>
+                    <li><strong>Python 版本:</strong> <span id="python-version">-</span></li>
+                    <li><strong>数据库:</strong> <span id="db-status">正常</span></li>
+                    <li><strong>最后更新:</strong> <span id="last-update">-</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const socket = io();
+    let startTime = new Date();
+    
+    // 连接成功
+    socket.on('connect', function() {
+        document.getElementById('real-time-status').innerHTML = '<p class="text-success">✅ WebSocket 连接正常</p>';
+        socket.emit('request_status');
+    });
+    
+    // 接收状态更新
+    socket.on('status_update', function(data) {
+        updateMonitorData(data);
+        document.getElementById('last-update').textContent = new Date().toLocaleString();
+    });
+    
+    // 更新监控数据
+    function updateMonitorData(data) {
+        document.getElementById('monitor-messages-today').textContent = data.messages_today || 0;
+        document.getElementById('monitor-active-sessions').textContent = data.active_sessions || 0;
+    }
+    
+    // 加载初始数据
+    fetch('/api/status')
+        .then(response => response.json())
+        .then(data => {
+            updateMonitorData(data);
+            document.getElementById('monitor-ai-status').textContent = data.ai_status === 'available' ? '正常' : '异常';
+            document.getElementById('monitor-kb-count').textContent = data.knowledge_base_count || 0;
+        })
+        .catch(error => {
+            console.error('加载状态失败:', error);
+        });
+    
+    // 更新运行时间
+    function updateUptime() {
+        const now = new Date();
+        const uptime = now - startTime;
+        const hours = Math.floor(uptime / (1000 * 60 * 60));
+        const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+        document.getElementById('uptime').textContent = `${hours}小时${minutes}分钟`;
+    }
+    
+    // 定期更新
+    setInterval(() => {
+        socket.emit('request_status');
+        updateUptime();
+    }, 5000);
+    
+    // 初始更新
+    updateUptime();
+</script>
+{% endblock %}

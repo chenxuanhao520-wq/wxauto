@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+{% block title %}客户管理 - 微信客服中台{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1><i class="bi bi-people"></i> 客户管理</h1>
+        <hr>
+    </div>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card status-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">总客户数</h5>
+                <h3 id="total-customers">-</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card success-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">VIP客户</h5>
+                <h3 id="vip-customers">-</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card warning-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">活跃客户</h5>
+                <h3 id="active-customers">-</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card danger-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">解决率</h5>
+                <h3 id="solve-rate">-</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 操作按钮 -->
+<div class="row mb-3">
+    <div class="col-md-6">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerModal">
+            <i class="bi bi-person-plus"></i> 注册新客户
+        </button>
+        <button class="btn btn-success" onclick="refreshCustomers()">
+            <i class="bi bi-arrow-clockwise"></i> 刷新
+        </button>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-cloud-arrow-down-fill"></i> 同步
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="syncFromExternal()"><i class="bi bi-download"></i> 从表格导入</a></li>
+                <li><a class="dropdown-item" href="#" onclick="syncToExternal()"><i class="bi bi-upload"></i> 导出到表格</a></li>
+                <li><a class="dropdown-item" href="#" onclick="syncBoth()"><i class="bi bi-arrow-repeat"></i> 双向同步</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" onclick="showSyncStatus()"><i class="bi bi-info-circle"></i> 同步状态</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="input-group">
+            <select class="form-select" id="group-filter" onchange="filterCustomers()">
+                <option value="">所有群聊</option>
+                <option value="技术支持群">技术支持群</option>
+                <option value="VIP客户群">VIP客户群</option>
+                <option value="测试群">测试群</option>
+            </select>
+            <input type="text" class="form-control" id="search-input" placeholder="搜索客户姓名或编号..." onkeyup="searchCustomers()">
+        </div>
+    </div>
+</div>
+
+<!-- 客户列表 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list"></i> 客户列表</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>客户编号</th>
+                                <th>姓名</th>
+                                <th>群聊</th>
+                                <th>类型</th>
+                                <th>问题数</th>
+                                <th>解决率</th>
+                                <th>优先级</th>
+                                <th>最后活跃</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table">
+                            <tr>
+                                <td colspan="9" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 注册新客户模态框 -->
+<div class="modal fade" id="registerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">注册新客户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="register-form">
+                    <div class="mb-3">
+                        <label class="form-label">客户姓名 *</label>
+                        <input type="text" class="form-control" id="customer-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">所属群聊 *</label>
+                        <select class="form-select" id="customer-group" required>
+                            <option value="">请选择群聊</option>
+                            <option value="技术支持群">技术支持群</option>
+                            <option value="VIP客户群">VIP客户群</option>
+                            <option value="测试群">测试群</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">优先级</label>
+                        <select class="form-select" id="customer-priority">
+                            <option value="1">1 - 低</option>
+                            <option value="2">2 - 较低</option>
+                            <option value="3" selected>3 - 普通</option>
+                            <option value="4">4 - 较高</option>
+                            <option value="5">5 - 高</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">备注</label>
+                        <textarea class="form-control" id="customer-notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="registerCustomer()">注册</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 客户详情模态框 -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">客户详情</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="customer-detail-content">
+                <!-- 动态加载内容 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="saveCustomerDetail()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 提示消息 -->
+<div id="alert-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let customersData = [];
+    
+    // 页面加载时初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCustomerStats();
+        loadCustomers();
+    });
+    
+    // 加载客户统计
+    function loadCustomerStats() {
+        fetch('/api/customers/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('total-customers').textContent = data.total_customers || 0;
+                document.getElementById('vip-customers').textContent = data.vip_customers || 0;
+                document.getElementById('active-customers').textContent = data.active_customers || 0;
+                document.getElementById('solve-rate').textContent = 
+                    (data.solve_rate * 100).toFixed(1) + '%' || '0%';
+            })
+            .catch(error => {
+                console.error('加载客户统计失败:', error);
+            });
+    }
+    
+    // 加载客户列表
+    function loadCustomers() {
+        fetch('/api/customers')
+            .then(response => response.json())
+            .then(data => {
+                customersData = data.customers || [];
+                displayCustomers(customersData);
+            })
+            .catch(error => {
+                console.error('加载客户列表失败:', error);
+                document.getElementById('customers-table').innerHTML = 
+                    '<tr><td colspan="9" class="text-center text-danger">加载失败</td></tr>';
+            });
+    }
+    
+    // 显示客户列表
+    function displayCustomers(customers) {
+        const tbody = document.getElementById('customers-table');
+        
+        if (customers.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">暂无客户数据</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = customers.map(customer => {
+            const solveRate = customer.total_questions > 0 ? 
+                (customer.solved_questions / customer.total_questions * 100).toFixed(1) : 0;
+            
+            const priorityClass = getPriorityClass(customer.priority);
+            const lastActive = new Date(customer.last_active).toLocaleString();
+            
+            return `
+                <tr>
+                    <td><code>${customer.customer_id}</code></td>
+                    <td>${customer.name}</td>
+                    <td>${customer.group_name}</td>
+                    <td><span class="badge bg-${getGroupTypeClass(customer.group_type)}">${customer.group_type}</span></td>
+                    <td>${customer.total_questions}</td>
+                    <td>${solveRate}%</td>
+                    <td><span class="badge ${priorityClass}">${customer.priority}</span></td>
+                    <td><small>${lastActive}</small></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="showCustomerDetail('${customer.customer_id}')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    // 获取优先级样式
+    function getPriorityClass(priority) {
+        if (priority >= 4) return 'bg-danger';
+        if (priority >= 3) return 'bg-warning';
+        return 'bg-secondary';
+    }
+    
+    // 获取群聊类型样式
+    function getGroupTypeClass(groupType) {
+        switch(groupType) {
+            case 'vip': return 'success';
+            case 'normal': return 'primary';
+            case 'test': return 'secondary';
+            default: return 'secondary';
+        }
+    }
+    
+    // 过滤客户
+    function filterCustomers() {
+        const groupFilter = document.getElementById('group-filter').value;
+        const searchInput = document.getElementById('search-input').value.toLowerCase();
+        
+        let filtered = customersData;
+        
+        if (groupFilter) {
+            filtered = filtered.filter(c => c.group_name === groupFilter);
+        }
+        
+        if (searchInput) {
+            filtered = filtered.filter(c => 
+                c.name.toLowerCase().includes(searchInput) || 
+                c.customer_id.toLowerCase().includes(searchInput)
+            );
+        }
+        
+        displayCustomers(filtered);
+    }
+    
+    // 搜索客户
+    function searchCustomers() {
+        filterCustomers();
+    }
+    
+    // 刷新客户列表
+    function refreshCustomers() {
+        loadCustomerStats();
+        loadCustomers();
+    }
+    
+    // 注册新客户
+    function registerCustomer() {
+        const name = document.getElementById('customer-name').value;
+        const group = document.getElementById('customer-group').value;
+        const priority = parseInt(document.getElementById('customer-priority').value);
+        const notes = document.getElementById('customer-notes').value;
+        
+        if (!name || !group) {
+            showAlert('请填写客户姓名和群聊', 'warning');
+            return;
+        }
+        
+        fetch('/api/customers/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                group_name: group,
+                priority: priority,
+                notes: notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert(`客户注册成功，编号：${data.customer_id}`, 'success');
+                document.getElementById('register-form').reset();
+                bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
+                refreshCustomers();
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('注册失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 显示客户详情
+    function showCustomerDetail(customerId) {
+        fetch(`/api/customers/${customerId}`)
+            .then(response => response.json())
+            .then(customer => {
+                const content = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>基本信息</h6>
+                            <table class="table table-sm">
+                                <tr><td>客户编号:</td><td><code>${customer.customer_id}</code></td></tr>
+                                <tr><td>姓名:</td><td>${customer.name}</td></tr>
+                                <tr><td>群聊:</td><td>${customer.group_name}</td></tr>
+                                <tr><td>类型:</td><td><span class="badge bg-${getGroupTypeClass(customer.group_type)}">${customer.group_type}</span></td></tr>
+                                <tr><td>注册时间:</td><td>${new Date(customer.registration_time).toLocaleString()}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>统计信息</h6>
+                            <table class="table table-sm">
+                                <tr><td>总问题数:</td><td>${customer.total_questions}</td></tr>
+                                <tr><td>已解决:</td><td>${customer.solved_questions}</td></tr>
+                                <tr><td>转人工:</td><td>${customer.handoff_count}</td></tr>
+                                <tr><td>解决率:</td><td>${customer.total_questions > 0 ? (customer.solved_questions/customer.total_questions*100).toFixed(1) : 0}%</td></tr>
+                                <tr><td>最后活跃:</td><td>${new Date(customer.last_active).toLocaleString()}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>编辑信息</h6>
+                            <div class="mb-3">
+                                <label class="form-label">优先级</label>
+                                <select class="form-select" id="edit-priority">
+                                    <option value="1" ${customer.priority == 1 ? 'selected' : ''}>1 - 低</option>
+                                    <option value="2" ${customer.priority == 2 ? 'selected' : ''}>2 - 较低</option>
+                                    <option value="3" ${customer.priority == 3 ? 'selected' : ''}>3 - 普通</option>
+                                    <option value="4" ${customer.priority == 4 ? 'selected' : ''}>4 - 较高</option>
+                                    <option value="5" ${customer.priority == 5 ? 'selected' : ''}>5 - 高</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">备注</label>
+                                <textarea class="form-control" id="edit-notes" rows="3">${customer.notes || ''}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">标签</label>
+                                <input type="text" class="form-control" id="edit-tags" value="${customer.tags.join(', ')}" placeholder="用逗号分隔多个标签">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('customer-detail-content').innerHTML = content;
+                document.getElementById('detailModal').setAttribute('data-customer-id', customerId);
+                
+                const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                modal.show();
+            })
+            .catch(error => {
+                showAlert('加载客户详情失败: ' + error.message, 'danger');
+            });
+    }
+    
+    // 保存客户详情
+    function saveCustomerDetail() {
+        const customerId = document.getElementById('detailModal').getAttribute('data-customer-id');
+        const priority = parseInt(document.getElementById('edit-priority').value);
+        const notes = document.getElementById('edit-notes').value;
+        const tags = document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(t => t);
+        
+        fetch(`/api/customers/${customerId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                priority: priority,
+                notes: notes,
+                tags: tags
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('客户信息已更新', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+                refreshCustomers();
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('更新失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 显示提示消息
+    function showAlert(message, type) {
+        const alertContainer = document.getElementById('alert-container');
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+    
+    // 从外部表格导入
+    function syncFromExternal() {
+        if (!confirm('确定要从飞书/钉钉表格导入客户信息吗？')) {
+            return;
+        }
+        
+        showAlert('正在从外部表格导入...', 'info');
+        
+        fetch('/api/sync/manual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                direction: 'from'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const result = data.result.from_external;
+                let message = '导入完成！';
+                
+                if (result.feishu && result.feishu.total > 0) {
+                    message += ` 飞书: ${result.feishu.new} 新增, ${result.feishu.updated} 更新`;
+                }
+                if (result.dingtalk && result.dingtalk.total > 0) {
+                    message += ` 钉钉: ${result.dingtalk.new} 新增, ${result.dingtalk.updated} 更新`;
+                }
+                
+                showAlert(message, 'success');
+                refreshCustomers();
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('导入失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 导出到外部表格
+    function syncToExternal() {
+        if (!confirm('确定要将客户信息导出到飞书/钉钉表格吗？')) {
+            return;
+        }
+        
+        showAlert('正在导出到外部表格...', 'info');
+        
+        fetch('/api/sync/manual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                direction: 'to'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const result = data.result.to_external;
+                let message = '导出完成！';
+                
+                if (result.feishu) {
+                    message += ` 飞书: ${result.feishu.success} 成功`;
+                }
+                if (result.dingtalk) {
+                    message += ` 钉钉: ${result.dingtalk.success} 成功`;
+                }
+                
+                showAlert(message, 'success');
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('导出失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 双向同步
+    function syncBoth() {
+        if (!confirm('确定要执行双向同步吗？这将同时导入和导出客户信息。')) {
+            return;
+        }
+        
+        showAlert('正在执行双向同步...', 'info');
+        
+        fetch('/api/sync/manual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                direction: 'both'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('双向同步完成！', 'success');
+                refreshCustomers();
+            } else {
+                showAlert(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showAlert('同步失败: ' + error.message, 'danger');
+        });
+    }
+    
+    // 显示同步状态
+    function showSyncStatus() {
+        fetch('/api/sync/status')
+            .then(response => response.json())
+            .then(data => {
+                let statusHtml = '<h6>同步状态</h6>';
+                statusHtml += '<ul class="list-group">';
+                statusHtml += `<li class="list-group-item">自动同步: ${data.is_running ? '运行中' : '已停止'}</li>`;
+                statusHtml += `<li class="list-group-item">同步间隔: ${data.sync_interval}秒</li>`;
+                statusHtml += `<li class="list-group-item">最后同步: ${data.last_sync_time || '未同步'}</li>`;
+                statusHtml += `<li class="list-group-item">飞书集成: ${data.enabled_integrations.feishu ? '已启用' : '未启用'}</li>`;
+                statusHtml += `<li class="list-group-item">钉钉集成: ${data.enabled_integrations.dingtalk ? '已启用' : '未启用'}</li>`;
+                statusHtml += `<li class="list-group-item">总客户数: ${data.total_customers}</li>`;
+                statusHtml += '</ul>';
+                
+                alert(statusHtml.replace(/<[^>]*>/g, '\n').replace(/\n+/g, '\n'));
+            })
+            .catch(error => {
+                showAlert('获取同步状态失败: ' + error.message, 'danger');
+            });
+    }
+</script>
+{% endblock %}
