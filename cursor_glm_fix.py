@@ -2,6 +2,7 @@
 """
 Cursor GLM 配置问题诊断和修复工具
 """
+import os
 import requests
 import json
 
