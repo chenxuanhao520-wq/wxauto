@@ -3,7 +3,26 @@ env: dev
 
 # LLM 配置
 llm:
-  primary: openai:gpt-4o-mini
+  primary: open# ==================== AI配置 ====================
+ai:
+  # 智能路由配置
+  smart_routing:
+    enabled: true                    # 是否启用智能路由
+    strategy: "cost_optimized"       # 路由策略：cost_optimized | quality_first | speed_first
+  
+  # 主提供商配置
+  primary:
+    provider: "qwen"                 # 主提供商
+    model: "qwen-turbo"              # 主模型（推荐：快速+便宜）
+  
+  # 备用提供商配置
+  fallback:
+    provider: "deepseek"             # 备用提供商
+    model: "deepseek-chat"           # 备用模型（准确+可靠）
+    enabled: true                    # 是否启用备用
+
+# 原有AI配置（保持兼容）
+ai_legacy:gpt-4o-mini
   fallback: deepseek:chat
   timeout_ms: 6000
   max_tokens: 512

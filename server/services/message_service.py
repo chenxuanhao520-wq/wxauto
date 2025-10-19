@@ -27,11 +27,29 @@ class MessageService:
         """初始化服务"""
         logger.info("初始化消息处理服务...")
         
-        # 初始化AI网关
+        # 初始化AI网关（启用智能路由）
         try:
             from modules.ai_gateway.gateway import AIGateway
-            self.ai_gateway = AIGateway()
-            logger.info("✅ AI网关初始化成功")
+            import os
+            
+            # 从环境变量读取配置
+            enable_smart_routing = os.getenv('ENABLE_SMART_ROUTING', 'true').lower() == 'true'
+            primary_provider = os.getenv('PRIMARY_PROVIDER', 'qwen')
+            primary_model = os.getenv('PRIMARY_MODEL', 'qwen-turbo')
+            fallback_provider = os.getenv('FALLBACK_PROVIDER', 'deepseek')
+            
+            self.ai_gateway = AIGateway(
+                primary_provider=primary_provider,
+                primary_model=primary_model,
+                fallback_provider=fallback_provider,
+                enable_smart_routing=enable_smart_routing
+            )
+            
+            if enable_smart_routing:
+                logger.info("✅ AI网关初始化成功（智能路由已启用）")
+            else:
+                logger.info("✅ AI网关初始化成功（传统主备模式）")
+                
         except Exception as e:
             logger.warning(f"⚠️  AI网关初始化失败: {e}")
             self.ai_gateway = None
@@ -103,9 +121,16 @@ class MessageService:
             if self.rag:
                 context = await self._retrieve_knowledge(content)
             
-            # 5. AI生成回复
+            # 5. AI生成回复（使用智能路由）
             if self.ai_gateway:
-                reply = await self._generate_reply(content, context)
+                # 构建智能路由的元数据
+                routing_metadata = {
+                    'customer_level': customer.get('level') if customer else 'normal',
+                    'is_critical': self._is_critical_message(content),
+                    'message_type': message.get('type', 'text')
+                }
+                
+                reply = await self._generate_reply(content, context, routing_metadata)
                 
                 # 6. 保存到数据库
                 await self._save_to_database(agent_id, message, reply)
@@ -116,7 +141,9 @@ class MessageService:
                 return {
                     'action': 'reply',
                     'content': reply['content'],
-                    'confidence': reply.get('confidence', 0.0)
+                    'confidence': reply.get('confidence', 0.0),
+                    'model_used': reply.get('model_used', 'unknown'),
+                    'routing_info': reply.get('routing_info', {})
                 }
             else:
                 # AI不可用，使用简单回复
@@ -200,35 +227,52 @@ class MessageService:
             logger.error(f"知识库检索失败: {e}")
             return ""
     
-    async def _generate_reply(self, query: str, context: str) -> Dict:
-        """AI生成回复"""
+    async def _generate_reply(
+        self,
+        query: str,
+        context: str,
+        routing_metadata: Optional[Dict] = None
+    ) -> Dict:
+        """
+        AI生成回复（支持智能路由）
+        
+        Args:
+            query: 用户问题
+            context: 知识库上下文
+            routing_metadata: 路由元数据（用于智能选择模型）
+        """
         try:
             if not self.ai_gateway:
                 raise Exception("AI网关不可用")
             
-            # 构建提示词
-            prompt = f"""你是一个专业的客服助手。
-
-{context if context else ''}
-
-用户问题：{query}
-
-请用友好、专业的语气回复用户。"""
+            # 调用AI网关（支持智能路由）
+            response = await self.ai_gateway.generate(
+                user_message=query,
+                evidence_context=context,
+                metadata=routing_metadata or {}
+            )
             
-            # 调用AI网关
-            response = self.ai_gateway.chat([
-                {'role': 'user', 'content': prompt}
-            ])
+            # 计算置信度（基于知识库证据）
+            confidence = 0.8 if context else 0.5
             
             return {
-                'content': response.get('content', ''),
-                'confidence': response.get('confidence', 0.0),
-                'model': response.get('model', 'unknown')
+                'content': response.content,
+                'confidence': confidence,
+                'model_used': response.model,
+                'provider': response.provider,
+                'tokens_used': response.token_total,
+                'latency_ms': response.latency_ms,
+                'routing_info': getattr(response, 'routing_info', {})
             }
         
         except Exception as e:
             logger.error(f"AI生成失败: {e}")
             raise
+    
+    def _is_critical_message(self, content: str) -> bool:
+        """判断是否为关键消息"""
+        critical_keywords = ['投诉', '退款', '故障', '紧急', '严重', '出事']
+        return any(keyword in content for keyword in critical_keywords)
     
     async def _save_to_database(self, agent_id: str, message: Dict, reply: Dict):
         """保存到数据库"""
