@@ -5,8 +5,10 @@
 处理客户端认证和Token管理
 """
 
+import os
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import jwt
@@ -15,10 +17,26 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# JWT配置（生产环境应从环境变量读取）
-SECRET_KEY = "your-secret-key-change-in-production"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24小时
+# ✅ 修复：从环境变量读取配置
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-key-change-in-production-at-least-32-chars")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))  # 24小时
+
+# ✅ 修复：从环境变量读取有效客户端凭据
+def _load_valid_agents():
+    """从环境变量加载有效的客户端凭据"""
+    credentials_str = os.getenv("VALID_AGENT_CREDENTIALS", "agent_001:test-api-key-001")
+    valid_agents = {}
+    for pair in credentials_str.split(","):
+        if ":" in pair:
+            agent_id, api_key = pair.strip().split(":", 1)
+            valid_agents[agent_id] = api_key
+    return valid_agents
+
+VALID_AGENTS = _load_valid_agents()
+
+# ✅ 添加：HTTP Bearer 认证
+security = HTTPBearer()
 
 
 class LoginRequest(BaseModel):
@@ -47,18 +65,12 @@ async def login(data: LoginRequest):
     """
     logger.info(f"登录请求: agent_id={data.agent_id}")
     
-    # TODO: 验证agent_id和api_key
-    # 这里简化处理，生产环境应从数据库验证
-    valid_agents = {
-        "agent_001": "your-api-key-here",
-        "agent_002": "another-api-key"
-    }
-    
-    if data.agent_id not in valid_agents:
+    # ✅ 修复：从环境变量读取的凭据验证
+    if data.agent_id not in VALID_AGENTS:
         logger.warning(f"未知的客户端: {data.agent_id}")
         raise HTTPException(status_code=401, detail="客户端ID无效")
     
-    if valid_agents[data.agent_id] != data.api_key:
+    if VALID_AGENTS[data.agent_id] != data.api_key:
         logger.warning(f"API Key错误: {data.agent_id}")
         raise HTTPException(status_code=401, detail="API Key错误")
     
@@ -78,6 +90,39 @@ async def login(data: LoginRequest):
         access_token=access_token,
         expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
+
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+    """
+    ✅ 新增：验证 JWT Token 的依赖函数
+    
+    Args:
+        credentials: HTTP Bearer 凭据
+    
+    Returns:
+        解码后的 payload
+    
+    Raises:
+        HTTPException: Token 无效或过期
+    """
+    token = credentials.credentials
+    
+    try:
+        # 验证并解码 JWT
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        agent_id = payload.get("sub")
+        
+        if not agent_id:
+            raise HTTPException(status_code=401, detail="Token payload 无效")
+        
+        return payload
+    
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token 已过期")
+        raise HTTPException(status_code=401, detail="Token 已过期")
+    except jwt.JWTError as e:
+        logger.warning(f"Token 验证失败: {e}")
+        raise HTTPException(status_code=401, detail="Token 无效")
 
 
 @router.post("/refresh")

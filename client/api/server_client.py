@@ -29,6 +29,9 @@ class ServerClient:
         self.agent_id = agent_id
         self.api_key = api_key
         
+        # ✅ 新增：缓存 token
+        self.token: Optional[str] = None
+        
         # 创建HTTP客户端
         self.client = httpx.AsyncClient(
             base_url=self.base_url,
@@ -72,7 +75,12 @@ class ServerClient:
             if response.status_code == 200:
                 data = response.json()
                 token = data.get('access_token')
-                logger.info("✅ 认证成功")
+                
+                # ✅ 修复：缓存 token 并更新请求头
+                self.token = token
+                self.client.headers['Authorization'] = f'Bearer {token}'
+                
+                logger.info("✅ 认证成功，token 已缓存")
                 return token
             else:
                 logger.error(f"认证失败: {response.status_code}")

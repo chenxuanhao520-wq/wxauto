@@ -4,6 +4,7 @@ AI 网关：智能路由 + 主备切换 + 自动降级
 """
 import os
 import logging
+import asyncio
 from typing import Optional, List, Dict, Any
 
 from .types import LLMRequest, LLMResponse, ProviderConfig
@@ -12,6 +13,7 @@ from .providers import (
     DeepSeekProvider,
     ClaudeProvider,
     QwenProvider,
+    GLMProvider,
     ErnieProvider,
     GeminiProvider,
     MoonshotProvider
@@ -184,7 +186,8 @@ class AIGateway:
         # 如果智能路由选择了模型，优先尝试
         if selected_provider:
             try:
-                response = selected_provider.generate(request)
+                # ✅ 修复异步阻塞：使用 asyncio.to_thread 包装同步调用
+                response = await asyncio.to_thread(selected_provider.generate, request)
                 
                 if response.content and not response.error:
                     # 添加路由信息到响应
@@ -209,7 +212,8 @@ class AIGateway:
                     f"调用 {'备用' if is_fallback else '主'} 提供商: {provider.name}"
                 )
                 
-                response = provider.generate(request)
+                # ✅ 修复异步阻塞：使用 asyncio.to_thread 包装同步调用
+                response = await asyncio.to_thread(provider.generate, request)
                 
                 # 检查是否成功
                 if response.content and not response.error:
@@ -320,6 +324,16 @@ class AIGateway:
                         api_base=os.getenv("MOONSHOT_API_BASE", "https://api.moonshot.cn/v1"),
                         model=model_name or os.getenv("MOONSHOT_MODEL", "moonshot-v1-8k"),
                         timeout=int(os.getenv("MOONSHOT_TIMEOUT", "30"))
+                    )
+                },
+                "glm": {
+                    "class": GLMProvider,
+                    "config": ProviderConfig(
+                        name="glm",
+                        api_key=os.getenv("GLM_API_KEY", ""),
+                        api_base=os.getenv("GLM_API_BASE", "https://open.bigmodel.cn/api/paas/v4"),
+                        model=model_name or os.getenv("GLM_MODEL", "glm-4-flash"),
+                        timeout=int(os.getenv("GLM_TIMEOUT", "30"))
                     )
                 }
             }

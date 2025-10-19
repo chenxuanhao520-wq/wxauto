@@ -6,6 +6,8 @@
 """
 
 import logging
+import uuid
+import hashlib
 from typing import List, Dict, Optional
 from datetime import datetime
 
@@ -42,8 +44,15 @@ class WxAutomation:
             # 转换为统一格式
             formatted_messages = []
             for msg in messages:
+                # ✅ 修复：为空 ID 生成稳定的唯一标识
+                msg_id = msg.get('id')
+                if not msg_id:
+                    # 使用消息内容生成稳定的 hash ID
+                    content_for_hash = f"{msg.get('chat_id', '')}:{msg.get('timestamp', '')}:{msg.get('content', '')}"
+                    msg_id = hashlib.md5(content_for_hash.encode()).hexdigest()
+                
                 formatted_messages.append({
-                    'id': msg.get('id', ''),
+                    'id': msg_id,
                     'chat_id': msg.get('group_id') or msg.get('sender_id', ''),
                     'sender': msg.get('sender_name', ''),
                     'content': msg.get('content', ''),

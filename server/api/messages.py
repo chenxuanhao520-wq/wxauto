@@ -6,10 +6,13 @@
 """
 
 import logging
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Dict, Optional
 from datetime import datetime
+
+# ✅ 导入认证依赖
+from .auth import verify_token
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +35,17 @@ class MessageResponse(BaseModel):
 
 
 @router.post("/messages", response_model=MessageResponse)
-async def process_message(request: Request, data: MessageRequest):
+async def process_message(
+    request: Request, 
+    data: MessageRequest,
+    user: dict = Depends(verify_token)  # ✅ 添加认证依赖
+):
     """
     处理客户端上报的消息
     
     Args:
         data: 消息数据
+        user: 认证后的用户信息
     
     Returns:
         处理结果

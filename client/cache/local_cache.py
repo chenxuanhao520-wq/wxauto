@@ -33,13 +33,20 @@ class LocalCache:
         if encryption_key:
             self.cipher = Fernet(encryption_key)
         else:
-            # 生成新密钥
-            key = Fernet.generate_key()
-            self.cipher = Fernet(key)
-            # 保存密钥
+            # ✅ 修复：先检查是否存在已有密钥
             key_file = self.cache_dir / '.key'
-            key_file.write_bytes(key)
-            logger.info("✅ 生成新的加密密钥")
+            if key_file.exists():
+                # 读取现有密钥
+                key = key_file.read_bytes()
+                self.cipher = Fernet(key)
+                logger.info("✅ 加载现有加密密钥")
+            else:
+                # 生成新密钥
+                key = Fernet.generate_key()
+                self.cipher = Fernet(key)
+                # 保存密钥
+                key_file.write_bytes(key)
+                logger.info("✅ 生成新的加密密钥")
         
         # 离线消息队列文件
         self.offline_queue_file = self.cache_dir / 'offline_queue.enc'
