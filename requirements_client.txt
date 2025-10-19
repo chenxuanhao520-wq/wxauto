@@ -1,0 +1,21 @@
+# 客户端依赖 - 轻量级
+
+# 基础库
+pyyaml>=6.0
+python-dateutil>=2.8.2
+
+# HTTP客户端
+httpx>=0.24.0
+
+# WebSocket
+websockets>=11.0
+
+# 加密
+cryptography>=41.0.0
+
+# 系统监控
+psutil>=5.9.0
+
+# 微信自动化（复用现有）
+# wxauto  # 如果有的话
+

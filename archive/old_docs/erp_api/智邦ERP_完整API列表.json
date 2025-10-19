@@ -1,0 +1,1535 @@
+[
+  {
+    "id": 1,
+    "name": "概述",
+    "url": "remark.html",
+    "category": "",
+    "full_path": "概述"
+  },
+  {
+    "id": 2,
+    "name": "对接须知",
+    "url": "infnotice.html",
+    "category": "",
+    "full_path": "对接须知"
+  },
+  {
+    "id": 11,
+    "name": "登录系统",
+    "url": "/webapi/v3/ov1/login",
+    "category": "鉴权接口",
+    "full_path": "鉴权接口/登录系统"
+  },
+  {
+    "id": 12,
+    "name": "退出系统",
+    "url": "/webapi/v3/ov1/logout",
+    "category": "鉴权接口",
+    "full_path": "鉴权接口/退出系统"
+  },
+  {
+    "id": 228,
+    "name": "部门列表",
+    "url": "/webapi/v3/orgs/dept/list",
+    "category": "组织架构/部门管理/部门对接",
+    "full_path": "组织架构/部门管理/部门对接/部门列表"
+  },
+  {
+    "id": 232,
+    "name": "部门添加",
+    "url": "/webapi/v3/orgs/dept/add",
+    "category": "组织架构/部门管理/部门对接",
+    "full_path": "组织架构/部门管理/部门对接/部门添加"
+  },
+  {
+    "id": 233,
+    "name": "部门修改",
+    "url": "/webapi/v3/orgs/dept/edit",
+    "category": "组织架构/部门管理/部门对接",
+    "full_path": "组织架构/部门管理/部门对接/部门修改"
+  },
+  {
+    "id": 234,
+    "name": "部门详情",
+    "url": "/webapi/v3/orgs/dept/detail",
+    "category": "组织架构/部门管理/部门对接",
+    "full_path": "组织架构/部门管理/部门对接/部门详情"
+  },
+  {
+    "id": 231,
+    "name": "账号列表",
+    "url": "/webapi/v3/orgs/user/list",
+    "category": "组织架构/账号管理/账号对接",
+    "full_path": "组织架构/账号管理/账号对接/账号列表"
+  },
+  {
+    "id": 278,
+    "name": "账号添加",
+    "url": "/webapi/v3/orgs/user/add",
+    "category": "组织架构/账号管理/账号对接",
+    "full_path": "组织架构/账号管理/账号对接/账号添加"
+  },
+  {
+    "id": 279,
+    "name": "账号修改",
+    "url": "/webapi/v3/orgs/user/edit",
+    "category": "组织架构/账号管理/账号对接",
+    "full_path": "组织架构/账号管理/账号对接/账号修改"
+  },
+  {
+    "id": 280,
+    "name": "账号删除",
+    "url": "/webapi/v3/orgs/user/delete",
+    "category": "组织架构/账号管理/账号对接",
+    "full_path": "组织架构/账号管理/账号对接/账号删除"
+  },
+  {
+    "id": 281,
+    "name": "账号详情",
+    "url": "/webapi/v3/orgs/user/detail",
+    "category": "组织架构/账号管理/账号对接",
+    "full_path": "组织架构/账号管理/账号对接/账号详情"
+  },
+  {
+    "id": 15,
+    "name": "分配新客户ID",
+    "url": "/webapi/v3/ov1/salesmanage/custom/add?apihelptype=new",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/分配新客户ID"
+  },
+  {
+    "id": 16,
+    "name": "添加或修改单位客户",
+    "url": "/webapi/v3/ov1/salesmanage/custom/add?intsort=1&apihelptype=save",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/添加或修改单位客户"
+  },
+  {
+    "id": 17,
+    "name": "添加或修改个人客户",
+    "url": "/webapi/v3/ov1/salesmanage/custom/add?intsort=2&apihelptype=save",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/添加或修改个人客户"
+  },
+  {
+    "id": 18,
+    "name": "获取客户详情",
+    "url": "/webapi/v3/ov1/salesmanage/custom/add?edit=1&apihelptype=get",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/获取客户详情"
+  },
+  {
+    "id": 19,
+    "name": "获取客户列表",
+    "url": "/webapi/v3/ov1/salesmanage/custom/list",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/获取客户列表"
+  },
+  {
+    "id": 20,
+    "name": "客户指派",
+    "url": "/webapi/v3/ov1/systemmanage/order?datatype=tel&apihelptype=save",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户指派"
+  },
+  {
+    "id": 21,
+    "name": "客户收回",
+    "url": "/webapi/v3/ov1/salesmanage/custom/takeback",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户收回"
+  },
+  {
+    "id": 22,
+    "name": "客户申请",
+    "url": "/webapi/v3/ov1/salesmanage/custom/apply",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户申请"
+  },
+  {
+    "id": 23,
+    "name": "客户审批",
+    "url": "/webapi/v3/ov1/salesmanage/custom/approve?__msgid=onsave",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户审批"
+  },
+  {
+    "id": 24,
+    "name": "客户审核",
+    "url": "/webapi/v3/ov1/salesManage/custom/approve_set?apihelptype=save",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户审核"
+  },
+  {
+    "id": 25,
+    "name": "客户跟进",
+    "url": "/webapi/v3/ov1/systemManage/reply?datatype=tel&apihelptype=save",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户跟进"
+  },
+  {
+    "id": 26,
+    "name": "客户共享",
+    "url": "/webapi/v3/ov1/salesManage/custom/share?apihelptype=save",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户共享"
+  },
+  {
+    "id": 27,
+    "name": "客户保护",
+    "url": "/webapi/v3/ov1/salesManage/custom/add?__msgid=profect",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户保护"
+  },
+  {
+    "id": 28,
+    "name": "客户放弃保护",
+    "url": "/webapi/v3/ov1/salesManage/custom/add?__msgid=unprofect",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户放弃保护"
+  },
+  {
+    "id": 297,
+    "name": "客户添加",
+    "url": "/webapi/v3/sales/customer/add",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户添加"
+  },
+  {
+    "id": 298,
+    "name": "客户修改",
+    "url": "/webapi/v3/sales/customer/edit",
+    "category": "销售栏目/客户管理/客户对接",
+    "full_path": "销售栏目/客户管理/客户对接/客户修改"
+  },
+  {
+    "id": 30,
+    "name": "添加或修改联系人",
+    "url": "/webapi/v3/ov1/salesmanage/person/add?apihelptype=save",
+    "category": "销售栏目/客户管理/客户联系人对接",
+    "full_path": "销售栏目/客户管理/客户联系人对接/添加或修改联系人"
+  },
+  {
+    "id": 31,
+    "name": "获取联系人详情",
+    "url": "/webapi/v3/ov1/salesmanage/person/add?edit=1&apihelptype=get",
+    "category": "销售栏目/客户管理/客户联系人对接",
+    "full_path": "销售栏目/客户管理/客户联系人对接/获取联系人详情"
+  },
+  {
+    "id": 32,
+    "name": "获取联系人列表",
+    "url": "/webapi/v3/ov1/salesmanage/person/list",
+    "category": "销售栏目/客户管理/客户联系人对接",
+    "full_path": "销售栏目/客户管理/客户联系人对接/获取联系人列表"
+  },
+  {
+    "id": 33,
+    "name": "联系人跟进",
+    "url": "/webapi/v3/ov1/systemManage/reply?datatype=person&apihelptype=save",
+    "category": "销售栏目/客户管理/客户联系人对接",
+    "full_path": "销售栏目/客户管理/客户联系人对接/联系人跟进"
+  },
+  {
+    "id": 36,
+    "name": "获取项目列表",
+    "url": "/webapi/v3/ov1/salesmanage/chance/list",
+    "category": "销售栏目/项目管理/项目对接",
+    "full_path": "销售栏目/项目管理/项目对接/获取项目列表"
+  },
+  {
+    "id": 37,
+    "name": "获取项目详情",
+    "url": "/webapi/v3/ov1/salesmanage/chance/add?apihelptype=get",
+    "category": "销售栏目/项目管理/项目对接",
+    "full_path": "销售栏目/项目管理/项目对接/获取项目详情"
+  },
+  {
+    "id": 38,
+    "name": "项目跟进",
+    "url": "/webapi/v3/ov1/systemManage/reply?datatype=chance&apihelptype=save",
+    "category": "销售栏目/项目管理/项目对接",
+    "full_path": "销售栏目/项目管理/项目对接/项目跟进"
+  },
+  {
+    "id": 39,
+    "name": "项目审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=25&apihelptype=save",
+    "category": "销售栏目/项目管理/项目对接",
+    "full_path": "销售栏目/项目管理/项目对接/项目审批"
+  },
+  {
+    "id": 42,
+    "name": "添加合同明细",
+    "url": "/webapi/v3/ov1/salesmanage/contract/contractlist?__msgId=addToContract",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/添加合同明细"
+  },
+  {
+    "id": 43,
+    "name": "编辑合同明细列表",
+    "url": "/webapi/v3/ov1/salesmanage/contract/contractlist",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/编辑合同明细列表"
+  },
+  {
+    "id": 44,
+    "name": "编辑合同明细删除",
+    "url": "/webapi/v3/ov1/salesmanage/contract/contractlist?__msgId=delete&batch=0",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/编辑合同明细删除"
+  },
+  {
+    "id": 45,
+    "name": "编辑合同明细",
+    "url": "/webapi/v3/ov1/salesmanage/contract/contractlist_edit?apihelptype=save",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/编辑合同明细"
+  },
+  {
+    "id": 46,
+    "name": "编辑合同明细单位选择",
+    "url": "/webapi/v3/ov1/salesmanage/contract/UnitChange?ord=0&__unit=0&company=0&apihelptype=get",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/编辑合同明细单位选择"
+  },
+  {
+    "id": 47,
+    "name": "添加或修改合同",
+    "url": "/webapi/v3/ov1/salesmanage/contract/add?apihelptype=save",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/添加或修改合同"
+  },
+  {
+    "id": 48,
+    "name": "合同关联客户",
+    "url": "/webapi/v3/ov1/salesmanage/custom/list?datatype=addcontract&checktype=redio",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同关联客户"
+  },
+  {
+    "id": 49,
+    "name": "合同关联对方代表",
+    "url": "/webapi/v3/ov1/salesManage/person/list?checktype=radio",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同关联对方代表"
+  },
+  {
+    "id": 50,
+    "name": "获取合同列表",
+    "url": "/webapi/v3/ov1/salesmanage/contract/billlist",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/获取合同列表"
+  },
+  {
+    "id": 51,
+    "name": "合同洽谈进展",
+    "url": "/webapi/v3/ov1/systemManage/reply?datatype=contract&apihelptype=save",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同洽谈进展"
+  },
+  {
+    "id": 52,
+    "name": "合同共享",
+    "url": "/webapi/v3/ov1/salesManage/contract/share?apihelptype=save",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同共享"
+  },
+  {
+    "id": 53,
+    "name": "合同审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=2&apihelptype=save",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同审批"
+  },
+  {
+    "id": 252,
+    "name": "合同详情",
+    "url": "/webapi/v3/sales/contract/detail",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同详情"
+  },
+  {
+    "id": 285,
+    "name": "合同审批修改",
+    "url": "/webapi/v3/sales/contract/approve/edit",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同审批修改"
+  },
+  {
+    "id": 286,
+    "name": "合同审批记录详情",
+    "url": "/webapi/v3/sales/contract/approve/approveStageList/detail",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同审批记录详情"
+  },
+  {
+    "id": 296,
+    "name": "合同添加",
+    "url": "/webapi/v3/sale/contract/add",
+    "category": "销售栏目/合同管理/合同对接",
+    "full_path": "销售栏目/合同管理/合同对接/合同添加"
+  },
+  {
+    "id": 56,
+    "name": "获取售后服务列表",
+    "url": "/webapi/v3/ov1/salesmanage/service/list",
+    "category": "销售栏目/售后服务/售后服务对接",
+    "full_path": "销售栏目/售后服务/售后服务对接/获取售后服务列表"
+  },
+  {
+    "id": 57,
+    "name": "获取售后服务详情",
+    "url": "/webapi/v3/ov1/salesmanage/service/add?apihelptype=get",
+    "category": "销售栏目/售后服务/售后服务对接",
+    "full_path": "销售栏目/售后服务/售后服务对接/获取售后服务详情"
+  },
+  {
+    "id": 58,
+    "name": "售后服务处理",
+    "url": "/webapi/v3/ov1/salesmanage/service/chuli?apihelptype=save",
+    "category": "销售栏目/售后服务/售后服务对接",
+    "full_path": "销售栏目/售后服务/售后服务对接/售后服务处理"
+  },
+  {
+    "id": 61,
+    "name": "添加或修改售后维修",
+    "url": "/webapi/v3/ov1/salesmanage/repair/DealAdd?apihelptype=save",
+    "category": "销售栏目/售后维修/售后维修对接",
+    "full_path": "销售栏目/售后维修/售后维修对接/添加或修改售后维修"
+  },
+  {
+    "id": 62,
+    "name": "获取售后维修列表",
+    "url": "/webapi/v3/ov1/salesmanage/repair/Deallist",
+    "category": "销售栏目/售后维修/售后维修对接",
+    "full_path": "销售栏目/售后维修/售后维修对接/获取售后维修列表"
+  },
+  {
+    "id": 63,
+    "name": "获取售后维修详情",
+    "url": "/webapi/v3/ov1/salesmanage/repair/Dealcontent?apihelptype=get",
+    "category": "销售栏目/售后维修/售后维修对接",
+    "full_path": "销售栏目/售后维修/售后维修对接/获取售后维修详情"
+  },
+  {
+    "id": 66,
+    "name": "获取采购列表",
+    "url": "/webapi/v3/ov1/storemanage/caigou/list",
+    "category": "采购栏目/采购管理/采购对接",
+    "full_path": "采购栏目/采购管理/采购对接/获取采购列表"
+  },
+  {
+    "id": 67,
+    "name": "获取采购详情",
+    "url": "/webapi/v3/ov1/storemanage/caigou/add?apihelptype=get",
+    "category": "采购栏目/采购管理/采购对接",
+    "full_path": "采购栏目/采购管理/采购对接/获取采购详情"
+  },
+  {
+    "id": 68,
+    "name": "获取采购审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=3&apihelptype=save",
+    "category": "采购栏目/采购管理/采购对接",
+    "full_path": "采购栏目/采购管理/采购对接/获取采购审批"
+  },
+  {
+    "id": 237,
+    "name": "供应商详情",
+    "url": "/webapi/v3/store/supplierDetail/detail",
+    "category": "采购栏目/供应商管理/供应商对接",
+    "full_path": "采购栏目/供应商管理/供应商对接/供应商详情"
+  },
+  {
+    "id": 238,
+    "name": "供应商列表",
+    "url": "/webapi/v3/store/supplierList",
+    "category": "采购栏目/供应商管理/供应商对接",
+    "full_path": "采购栏目/供应商管理/供应商对接/供应商列表"
+  },
+  {
+    "id": 71,
+    "name": "获取库存详情",
+    "url": "/webapi/v3/ov1/storemanage/store/content?apihelptype=get",
+    "category": "库存栏目/库存查看/库存查看对接",
+    "full_path": "库存栏目/库存查看/库存查看对接/获取库存详情"
+  },
+  {
+    "id": 72,
+    "name": "获取库存查看列表",
+    "url": "/webapi/v3/ov1/storemanage/store/list",
+    "category": "库存栏目/库存查看/库存查看对接",
+    "full_path": "库存栏目/库存查看/库存查看对接/获取库存查看列表"
+  },
+  {
+    "id": 246,
+    "name": "产品库存明细列表",
+    "url": "/webapi/v3/store/inventory/InventoryDetails",
+    "category": "库存栏目/库存查看/库存查看对接",
+    "full_path": "库存栏目/库存查看/库存查看对接/产品库存明细列表"
+  },
+  {
+    "id": 247,
+    "name": "产品库存汇总列表",
+    "url": "/webapi/v3/store/inventory/InventorySummary",
+    "category": "库存栏目/库存查看/库存查看对接",
+    "full_path": "库存栏目/库存查看/库存查看对接/产品库存汇总列表"
+  },
+  {
+    "id": 74,
+    "name": "获取仓库列表",
+    "url": "/webapi/apiHelper/stock/Stock/GetWarehouses",
+    "category": "库存栏目/库存查看/仓库对接",
+    "full_path": "库存栏目/库存查看/仓库对接/获取仓库列表"
+  },
+  {
+    "id": 299,
+    "name": "获取库位列表",
+    "url": "/webapi/v3/uview/stock/Pages/WareHouse/SettingApiList",
+    "category": "库存栏目/库存查看/仓库对接",
+    "full_path": "库存栏目/库存查看/仓库对接/获取库位列表"
+  },
+  {
+    "id": 300,
+    "name": "获取仓库列表（32.15及以后）",
+    "url": "/webapi/v3/store/WareHouseStructList",
+    "category": "库存栏目/库存查看/仓库对接",
+    "full_path": "库存栏目/库存查看/仓库对接/获取仓库列表（32.15及以后）"
+  },
+  {
+    "id": 77,
+    "name": "获取入库列表",
+    "url": "/webapi/v3/ov1/storemanage/kuin/list",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/获取入库列表"
+  },
+  {
+    "id": 78,
+    "name": "获取入库详情",
+    "url": "/webapi/v3/ov1/storemanage/kuin/detail?apihelptype=get",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/获取入库详情"
+  },
+  {
+    "id": 79,
+    "name": "获取入库产品明细",
+    "url": "/webapi/v3/ov1/storemanage/kuin/MoreKuinList",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/获取入库产品明细"
+  },
+  {
+    "id": 244,
+    "name": "入库成本修改",
+    "url": "/webapi/v3/store/kuin/costmodify/edit",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/入库成本修改"
+  },
+  {
+    "id": 245,
+    "name": "入库确认",
+    "url": "/webapi/v3/store/kuin/surekuin/edit",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/入库确认"
+  },
+  {
+    "id": 309,
+    "name": "入库确认（32.15及以后）",
+    "url": "/webapi/v3/store/KuInApplyEdit/edit",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/入库确认（32.15及以后）"
+  },
+  {
+    "id": 310,
+    "name": "入库列表（32.15及以后）",
+    "url": "/webapi/v3/store/KuInApplyList",
+    "category": "库存栏目/入库管理/入库对接",
+    "full_path": "库存栏目/入库管理/入库对接/入库列表（32.15及以后）"
+  },
+  {
+    "id": 243,
+    "name": "直接入库添加",
+    "url": "/webapi/v3/store/kuin/add",
+    "category": "库存栏目/入库管理/直接入库",
+    "full_path": "库存栏目/入库管理/直接入库/直接入库添加"
+  },
+  {
+    "id": 239,
+    "name": "出库确认",
+    "url": "/webapi/v3/store/kuout/surekuout/edit",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/出库确认"
+  },
+  {
+    "id": 240,
+    "name": "出库详情",
+    "url": "/webapi/v3/store/kuout/detail",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/出库详情"
+  },
+  {
+    "id": 241,
+    "name": "出库列表",
+    "url": "/webapi/v3/store/kuout/List",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/出库列表"
+  },
+  {
+    "id": 248,
+    "name": "库存操作修改",
+    "url": "/webapi/v3/store/inventory/edit",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/库存操作修改"
+  },
+  {
+    "id": 249,
+    "name": "库存操作详情",
+    "url": "/webapi/v3/store/inventory/detail",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/库存操作详情"
+  },
+  {
+    "id": 307,
+    "name": "出库确认（32.15及以后）",
+    "url": "/webapi/v3/store/KuOutApplyEdit/edit",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/出库确认（32.15及以后）"
+  },
+  {
+    "id": 308,
+    "name": "出库列表（32.15及以后）",
+    "url": "/webapi/v3/store/KuOutApplyList",
+    "category": "库存栏目/出库管理/出库对接",
+    "full_path": "库存栏目/出库管理/出库对接/出库列表（32.15及以后）"
+  },
+  {
+    "id": 84,
+    "name": "获取发货详情",
+    "url": "/webapi/v3/ov1/storemanage/sent/detail?apihelptype=get",
+    "category": "库存栏目/发货管理/发货对接",
+    "full_path": "库存栏目/发货管理/发货对接/获取发货详情"
+  },
+  {
+    "id": 85,
+    "name": "获取发货产品明细",
+    "url": "/webapi/v3/ov1/storemanage/sent/moresendlist",
+    "category": "库存栏目/发货管理/发货对接",
+    "full_path": "库存栏目/发货管理/发货对接/获取发货产品明细"
+  },
+  {
+    "id": 86,
+    "name": "获取发货列表",
+    "url": "/webapi/v3/ov1/storemanage/sent/list",
+    "category": "库存栏目/发货管理/发货对接",
+    "full_path": "库存栏目/发货管理/发货对接/获取发货列表"
+  },
+  {
+    "id": 89,
+    "name": "获取产品单位列表",
+    "url": "/webapi/apiHelper/sale/Product/GetProductUnitLists",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/获取产品单位列表"
+  },
+  {
+    "id": 90,
+    "name": "获取产品分类信息",
+    "url": "/webapi/v3/ov1/systemManage/product_sort_list?stype=check&apihelptype=get",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/获取产品分类信息"
+  },
+  {
+    "id": 91,
+    "name": "获取发票类型列表",
+    "url": "/webapi/apiHelper/sale/Product/GetInvoiceTypesLists",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/获取发票类型列表"
+  },
+  {
+    "id": 92,
+    "name": "获取产品列表",
+    "url": "/webapi/v3/ov1/salesmanage/product/billlist",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/获取产品列表"
+  },
+  {
+    "id": 93,
+    "name": "获取产品详情",
+    "url": "/webapi/v3/ov1/salesmanage/product/billService?apihelptype=get",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/获取产品详情"
+  },
+  {
+    "id": 94,
+    "name": "产品加入合同",
+    "url": "/webapi/v3/ov1/salesmanage/contract/contractlist?__msgId=addToContract",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/产品加入合同"
+  },
+  {
+    "id": 304,
+    "name": "产品批量添加",
+    "url": "/webapi/v3/store/productbatch/add",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/产品批量添加"
+  },
+  {
+    "id": 305,
+    "name": "产品添加",
+    "url": "/webapi/v3/store/product/add",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/产品添加"
+  },
+  {
+    "id": 306,
+    "name": "产品修改",
+    "url": "/webapi/v3/store/product/edit",
+    "category": "库存栏目/产品管理/产品对接",
+    "full_path": "库存栏目/产品管理/产品对接/产品修改"
+  },
+  {
+    "id": 97,
+    "name": "物料清单添加/修改(适用V32.10已有功能)",
+    "url": "/webapi/apiHelper/produce/Bom/SaveBoms",
+    "category": "生产栏目/物料清单管理/物料清单对接",
+    "full_path": "生产栏目/物料清单管理/物料清单对接/物料清单添加/修改(适用V32.10已有功能)"
+  },
+  {
+    "id": 98,
+    "name": "物料清单列表(适用V32.10已有功能)",
+    "url": "/webapi/apiHelper/produce/Bom/GetBoms",
+    "category": "生产栏目/物料清单管理/物料清单对接",
+    "full_path": "生产栏目/物料清单管理/物料清单对接/物料清单列表(适用V32.10已有功能)"
+  },
+  {
+    "id": 101,
+    "name": "获取设备列表",
+    "url": "/webapi/apiHelper/produce/Machine/GetMachines",
+    "category": "生产栏目/设备管理/设备对接",
+    "full_path": "生产栏目/设备管理/设备对接/获取设备列表"
+  },
+  {
+    "id": 324,
+    "name": "设备添加",
+    "url": "/webapi/v3/produce/Machine/add",
+    "category": "生产栏目/设备管理/设备对接",
+    "full_path": "生产栏目/设备管理/设备对接/设备添加"
+  },
+  {
+    "id": 315,
+    "name": "岗位列表",
+    "url": "/webapi/v3/produceV2/workflow/workingprocedure/jobs/list",
+    "category": "生产栏目/工序管理/岗位对接",
+    "full_path": "生产栏目/工序管理/岗位对接/岗位列表"
+  },
+  {
+    "id": 316,
+    "name": "工序分类列表",
+    "url": "/webapi/v3/produceV2/workflow/workingprocedure/class/list",
+    "category": "生产栏目/工序管理/工序分类对接",
+    "full_path": "生产栏目/工序管理/工序分类对接/工序分类列表"
+  },
+  {
+    "id": 256,
+    "name": "工序添加",
+    "url": "/webapi/v3/produceV2/workflow/workingprocedure/add",
+    "category": "生产栏目/工序管理/工序对接",
+    "full_path": "生产栏目/工序管理/工序对接/工序添加"
+  },
+  {
+    "id": 257,
+    "name": "工序修改",
+    "url": "/webapi/v3/produceV2/workflow/workingprocedure/edit",
+    "category": "生产栏目/工序管理/工序对接",
+    "full_path": "生产栏目/工序管理/工序对接/工序修改"
+  },
+  {
+    "id": 258,
+    "name": "工序详情",
+    "url": "/webapi/v3/produceV2/workflow/workingprocedure/detail",
+    "category": "生产栏目/工序管理/工序对接",
+    "full_path": "生产栏目/工序管理/工序对接/工序详情"
+  },
+  {
+    "id": 260,
+    "name": "工序列表",
+    "url": "/webapi/v3/produceV2/workflow/workingprocedure/list",
+    "category": "生产栏目/工序管理/工序对接",
+    "full_path": "生产栏目/工序管理/工序对接/工序列表"
+  },
+  {
+    "id": 253,
+    "name": "工艺路线添加",
+    "url": "/webapi/v3/produceV2/workflow/workingflow/add",
+    "category": "生产栏目/工艺路线管理/工艺路线对接",
+    "full_path": "生产栏目/工艺路线管理/工艺路线对接/工艺路线添加"
+  },
+  {
+    "id": 254,
+    "name": "工艺路线修改",
+    "url": "/webapi/v3/produceV2/workflow/workingflow/edit",
+    "category": "生产栏目/工艺路线管理/工艺路线对接",
+    "full_path": "生产栏目/工艺路线管理/工艺路线对接/工艺路线修改"
+  },
+  {
+    "id": 255,
+    "name": "工艺路线详情",
+    "url": "/webapi/v3/produceV2/workflow/workingflow/detail",
+    "category": "生产栏目/工艺路线管理/工艺路线对接",
+    "full_path": "生产栏目/工艺路线管理/工艺路线对接/工艺路线详情"
+  },
+  {
+    "id": 259,
+    "name": "工艺路线列表",
+    "url": "/webapi/v3/produceV2/workflow/workingflow/list",
+    "category": "生产栏目/工艺路线管理/工艺路线对接",
+    "full_path": "生产栏目/工艺路线管理/工艺路线对接/工艺路线列表"
+  },
+  {
+    "id": 110,
+    "name": "派工添加",
+    "url": "/webapi/apiHelper/produce/WorkAssigns/SaveWorkAssigns",
+    "category": "生产栏目/派工管理/派工对接",
+    "full_path": "生产栏目/派工管理/派工对接/派工添加"
+  },
+  {
+    "id": 111,
+    "name": "获取派工列表",
+    "url": "/webapi/apiHelper/produce/WorkAssigns/GetWorkAssigns",
+    "category": "生产栏目/派工管理/派工对接",
+    "full_path": "生产栏目/派工管理/派工对接/获取派工列表"
+  },
+  {
+    "id": 114,
+    "name": "领料添加",
+    "url": "/webapi/apiHelper/produce/MaterialOrder/SaveMaterialOrders",
+    "category": "生产栏目/领料管理/领料对接",
+    "full_path": "生产栏目/领料管理/领料对接/领料添加"
+  },
+  {
+    "id": 115,
+    "name": "获取领料列表",
+    "url": "/webapi/apiHelper/produce/MaterialOrder/GetMaterialOrders",
+    "category": "生产栏目/领料管理/领料对接",
+    "full_path": "生产栏目/领料管理/领料对接/获取领料列表"
+  },
+  {
+    "id": 118,
+    "name": "生产质检任务添加",
+    "url": "/webapi/apiHelper/produce/QualityTesting/SaveQualityTestingsTask",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/生产质检任务添加"
+  },
+  {
+    "id": 119,
+    "name": "获取生产质检任务列表",
+    "url": "/webapi/apiHelper/produce/QualityTesting/GetQualityTestingTasks",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/获取生产质检任务列表"
+  },
+  {
+    "id": 120,
+    "name": "生产质检添加/修改",
+    "url": "/webapi/apiHelper/produce/QualityTesting/SaveQualityTestings",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/生产质检添加/修改"
+  },
+  {
+    "id": 121,
+    "name": "获取生产质检计划",
+    "url": "/webapi/apiHelper/produce/QualityTesting/GetQualityTestingPlans",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/获取生产质检计划"
+  },
+  {
+    "id": 122,
+    "name": "获取生产质检列表",
+    "url": "/webapi/apiHelper/produce/QualityTesting/GetQualityTestings",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/获取生产质检列表"
+  },
+  {
+    "id": 123,
+    "name": "生产质检审核",
+    "url": "/webapi/apiHelper/produce/QualityTesting/CheckQualityTestings",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/生产质检审核"
+  },
+  {
+    "id": 124,
+    "name": "获取不合格原因列表",
+    "url": "/webapi/apiHelper/produce/QualityTesting/GetUnQualiFiedList",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/获取不合格原因列表"
+  },
+  {
+    "id": 125,
+    "name": "获取报废原因列表",
+    "url": "/webapi/apiHelper/produce/QualityTesting/GetScrapReasonList",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/获取报废原因列表"
+  },
+  {
+    "id": 126,
+    "name": "获取质量等级列表",
+    "url": "/webapi/apiHelper/produce/QualityTesting/GetQualityLevelList",
+    "category": "生产栏目/生产质检管理/生产质检对接",
+    "full_path": "生产栏目/生产质检管理/生产质检对接/获取质量等级列表"
+  },
+  {
+    "id": 129,
+    "name": "物料登记添加",
+    "url": "/webapi/apiHelper/produce/MaterialRegister/SaveMaterialRegisters",
+    "category": "生产栏目/物料登记管理/物料登记对接",
+    "full_path": "生产栏目/物料登记管理/物料登记对接/物料登记添加"
+  },
+  {
+    "id": 130,
+    "name": "获取物料登记列表",
+    "url": "/webapi/apiHelper/produce/MaterialRegister/GetMaterialRegisters",
+    "category": "生产栏目/物料登记管理/物料登记对接",
+    "full_path": "生产栏目/物料登记管理/物料登记对接/获取物料登记列表"
+  },
+  {
+    "id": 263,
+    "name": "工序汇报添加",
+    "url": "/webapi/v3/produceV2/processreport/add",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报添加"
+  },
+  {
+    "id": 264,
+    "name": "工序汇报删除",
+    "url": "/webapi/v3/produceV2/processreport/delete",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报删除"
+  },
+  {
+    "id": 265,
+    "name": "工序汇报计划",
+    "url": "/webapi/v3/produceV2/procedure/planlist",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报计划"
+  },
+  {
+    "id": 266,
+    "name": "工序汇报详情",
+    "url": "/webapi/v3/produceV2/processreport/detail",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报详情"
+  },
+  {
+    "id": 267,
+    "name": "工序汇报列表查询(明细)",
+    "url": "/webapi/v3/produceV2/processreportlist/detail",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报列表查询(明细)"
+  },
+  {
+    "id": 268,
+    "name": "工序汇报列表查询(汇总)",
+    "url": "/webapi/v3/produceV2/processreportlist/summary",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报列表查询(汇总)"
+  },
+  {
+    "id": 269,
+    "name": "工序汇报修改",
+    "url": "/webapi/v3/produceV2/processreport/edit",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/工序汇报修改"
+  },
+  {
+    "id": 317,
+    "name": "获取工序任务列表",
+    "url": "/webapi/v3/produceV2/ProcessReportTaskList/List",
+    "category": "生产栏目/工序汇报管理/工序汇报计划",
+    "full_path": "生产栏目/工序汇报管理/工序汇报计划/获取工序任务列表"
+  },
+  {
+    "id": 133,
+    "name": "获取银行账户明细",
+    "url": "/webapi/v3/ov1/financemanage/bank/add?apihelptype=get",
+    "category": "财务栏目/现金银行/银行对接",
+    "full_path": "财务栏目/现金银行/银行对接/获取银行账户明细"
+  },
+  {
+    "id": 134,
+    "name": "获取银行账户列表",
+    "url": "/webapi/v3/ov1/financemanage/bank/list",
+    "category": "财务栏目/现金银行/银行对接",
+    "full_path": "财务栏目/现金银行/银行对接/获取银行账户列表"
+  },
+  {
+    "id": 137,
+    "name": "获取收款详情",
+    "url": "/webapi/v3/ov1/financemanage/moneyback/content?apihelptype=get",
+    "category": "财务栏目/收款开票管理/收款对接",
+    "full_path": "财务栏目/收款开票管理/收款对接/获取收款详情"
+  },
+  {
+    "id": 138,
+    "name": "获取收款列表",
+    "url": "/webapi/v3/ov1/financemanage/moneyback/list",
+    "category": "财务栏目/收款开票管理/收款对接",
+    "full_path": "财务栏目/收款开票管理/收款对接/获取收款列表"
+  },
+  {
+    "id": 140,
+    "name": "获取开票详情",
+    "url": "/webapi/v3/ov1/financemanage/invoiceback/content?apihelptype=get",
+    "category": "财务栏目/收款开票管理/开票对接",
+    "full_path": "财务栏目/收款开票管理/开票对接/获取开票详情"
+  },
+  {
+    "id": 141,
+    "name": "获取开票列表",
+    "url": "/webapi/v3/ov1/financemanage/invoiceback/list",
+    "category": "财务栏目/收款开票管理/开票对接",
+    "full_path": "财务栏目/收款开票管理/开票对接/获取开票列表"
+  },
+  {
+    "id": 144,
+    "name": "获取付款详情",
+    "url": "/webapi/v3/ov1/financemanage/moneyout/content?apihelptype=get",
+    "category": "财务栏目/付款收票管理/付款对接",
+    "full_path": "财务栏目/付款收票管理/付款对接/获取付款详情"
+  },
+  {
+    "id": 145,
+    "name": "获取付款列表",
+    "url": "/webapi/v3/ov1/financemanage/moneyout/list",
+    "category": "财务栏目/付款收票管理/付款对接",
+    "full_path": "财务栏目/付款收票管理/付款对接/获取付款列表"
+  },
+  {
+    "id": 148,
+    "name": "添加费用申请",
+    "url": "/webapi/v3/ov1/financemanage/apply/add?apihelptype=save",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/添加费用申请"
+  },
+  {
+    "id": 149,
+    "name": "编辑费用申请明细列表",
+    "url": "/webapi/v3/ov1/financemanage/apply/mxlist",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/编辑费用申请明细列表"
+  },
+  {
+    "id": 150,
+    "name": "编辑费用申请明细删除",
+    "url": "/webapi/v3/ov1/financemanage/apply/mxlist?__msgId=delete&batch=0",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/编辑费用申请明细删除"
+  },
+  {
+    "id": 151,
+    "name": "编辑费用申请明细",
+    "url": "/webapi/v3/ov1/financemanage/apply/mxedit?apihelptype=save",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/编辑费用申请明细"
+  },
+  {
+    "id": 152,
+    "name": "编辑费用申请明细类型选择",
+    "url": "/webapi/v3/ov1/financemanage/apply/getsortfields?datatype=paysq&apihelptype=get",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/编辑费用申请明细类型选择"
+  },
+  {
+    "id": 153,
+    "name": "获取费用申请详情",
+    "url": "/webapi/v3/ov1/financemanage/apply/add?edit=1&apihelptype=get",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/获取费用申请详情"
+  },
+  {
+    "id": 154,
+    "name": "获取费用申请列表",
+    "url": "/webapi/v3/ov1/financemanage/apply/list",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/获取费用申请列表"
+  },
+  {
+    "id": 155,
+    "name": "费用申请提交审批",
+    "url": "/webapi/v3/ov1/systemmanage/setapprove?__msgId=save&approve=7",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/费用申请提交审批"
+  },
+  {
+    "id": 156,
+    "name": "费用申请审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=7&apihelptype=save",
+    "category": "财务栏目/费用管理/费用申请对接",
+    "full_path": "财务栏目/费用管理/费用申请对接/费用申请审批"
+  },
+  {
+    "id": 158,
+    "name": "添加费用使用",
+    "url": "/webapi/v3/ov1/financemanage/employ/add?apihelptype=save",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/添加费用使用"
+  },
+  {
+    "id": 159,
+    "name": "费用使用关联申请单",
+    "url": "/webapi/v3/ov1/financeManage/apply/list?datatype=1&checktype=radio",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/费用使用关联申请单"
+  },
+  {
+    "id": 160,
+    "name": "费用使用使用人员",
+    "url": "/webapi/v3/ov1/systemManage/gate_list?sort=2&stype=radio",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/费用使用使用人员"
+  },
+  {
+    "id": 161,
+    "name": "编辑费用使用明细列表",
+    "url": "/webapi/v3/ov1/financemanage/employ/mxlist",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/编辑费用使用明细列表"
+  },
+  {
+    "id": 162,
+    "name": "编辑费用使用明细删除",
+    "url": "/webapi/v3/ov1/financemanage/employ/mxlist?__msgId=delete&batch=0",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/编辑费用使用明细删除"
+  },
+  {
+    "id": 163,
+    "name": "编辑费用使用明细",
+    "url": "/webapi/v3/ov1/financemanage/employ/mxedit?apihelptype=save",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/编辑费用使用明细"
+  },
+  {
+    "id": 164,
+    "name": "编辑费用使用明细类型选择",
+    "url": "/webapi/v3/ov1/financemanage/apply/getsortfields?apihelptype=get",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/编辑费用使用明细类型选择"
+  },
+  {
+    "id": 165,
+    "name": "获取费用使用详情",
+    "url": "/webapi/v3/ov1/financemanage/employ/add?edit=1&apihelptype=get",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/获取费用使用详情"
+  },
+  {
+    "id": 166,
+    "name": "获取费用使用列表",
+    "url": "/webapi/v3/ov1/financemanage/employ/list",
+    "category": "财务栏目/费用管理/费用使用对接",
+    "full_path": "财务栏目/费用管理/费用使用对接/获取费用使用列表"
+  },
+  {
+    "id": 168,
+    "name": "添加费用报销",
+    "url": "/webapi/v3/ov1/financemanage/expenditure/add?apihelptype=save",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/添加费用报销"
+  },
+  {
+    "id": 169,
+    "name": "费用报销报销人员",
+    "url": "/webapi/v3/ov1/systemManage/gate_list?sort=2&stype=radio",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/费用报销报销人员"
+  },
+  {
+    "id": 170,
+    "name": "编辑费用报销明细列表",
+    "url": "/webapi/v3/ov1/financemanage/expenditure/mxlist",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/编辑费用报销明细列表"
+  },
+  {
+    "id": 171,
+    "name": "获取费用报销详情",
+    "url": "/webapi/v3/ov1/financemanage/expenditure/add?edit=1&apihelptype=get",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/获取费用报销详情"
+  },
+  {
+    "id": 172,
+    "name": "获取费用报销列表",
+    "url": "/webapi/v3/ov1/financemanage/expenditure/list",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/获取费用报销列表"
+  },
+  {
+    "id": 173,
+    "name": "费用报销审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=4&apihelptype=save",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/费用报销审批"
+  },
+  {
+    "id": 174,
+    "name": "费用报销出账",
+    "url": "/webapi/v3/ov1/financeManage/expenditure/bankout?apihelptype=save",
+    "category": "财务栏目/费用管理/费用报销对接",
+    "full_path": "财务栏目/费用管理/费用报销对接/费用报销出账"
+  },
+  {
+    "id": 176,
+    "name": "添加费用借款",
+    "url": "/webapi/v3/ov1/financemanage/borrow/add?edit=1&apihelptype=save",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/添加费用借款"
+  },
+  {
+    "id": 177,
+    "name": "费用借款借款人员",
+    "url": "/webapi/v3/ov1/systemManage/gate_list?sort=2&stype=radio",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/费用借款借款人员"
+  },
+  {
+    "id": 178,
+    "name": "获取费用借款详情",
+    "url": "/webapi/v3/ov1/financemanage/borrow/add?apihelptype=get",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/获取费用借款详情"
+  },
+  {
+    "id": 179,
+    "name": "获取费用借款列表",
+    "url": "/webapi/v3/ov1/financemanage/borrow/list",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/获取费用借款列表"
+  },
+  {
+    "id": 180,
+    "name": "费用借款审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=6&apihelptype=save",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/费用借款审批"
+  },
+  {
+    "id": 181,
+    "name": "费用借款出账",
+    "url": "/webapi/v3/ov1/financemanage/borrow/chuzhang?apihelptype=save",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/费用借款出账"
+  },
+  {
+    "id": 182,
+    "name": "费用借款返还",
+    "url": "/webapi/v3/ov1/financeManage/reimburse/add?edit=1&datatype=borrow&apihelptype=save",
+    "category": "财务栏目/费用管理/费用借款对接",
+    "full_path": "财务栏目/费用管理/费用借款对接/费用借款返还"
+  },
+  {
+    "id": 184,
+    "name": "添加费用返还",
+    "url": "/webapi/v3/ov1/financemanage/reimburse/add?edit=1&apihelptype=save",
+    "category": "财务栏目/费用管理/费用返还对接",
+    "full_path": "财务栏目/费用管理/费用返还对接/添加费用返还"
+  },
+  {
+    "id": 185,
+    "name": "费用返还关联借款单",
+    "url": "/webapi/v3/ov1/financeManage/borrow/list?datatype=addreimburse&checktype=radio",
+    "category": "财务栏目/费用管理/费用返还对接",
+    "full_path": "财务栏目/费用管理/费用返还对接/费用返还关联借款单"
+  },
+  {
+    "id": 186,
+    "name": "获取费用返还详情",
+    "url": "/webapi/v3/ov1/financemanage/reimburse/add?apihelptype=get",
+    "category": "财务栏目/费用管理/费用返还对接",
+    "full_path": "财务栏目/费用管理/费用返还对接/获取费用返还详情"
+  },
+  {
+    "id": 187,
+    "name": "获取费用返还列表",
+    "url": "/webapi/v3/ov1/financemanage/reimburse/list",
+    "category": "财务栏目/费用管理/费用返还对接",
+    "full_path": "财务栏目/费用管理/费用返还对接/获取费用返还列表"
+  },
+  {
+    "id": 188,
+    "name": "费用返还审批",
+    "url": "/webapi/v3/ov1/systemmanage/approve?dtype=5&apihelptype=save",
+    "category": "财务栏目/费用管理/费用返还对接",
+    "full_path": "财务栏目/费用管理/费用返还对接/费用返还审批"
+  },
+  {
+    "id": 189,
+    "name": "费用返还入账",
+    "url": "/webapi/v3/ov1/financeManage/reimburse/ruzhang?apihelptype=save",
+    "category": "财务栏目/费用管理/费用返还对接",
+    "full_path": "财务栏目/费用管理/费用返还对接/费用返还入账"
+  },
+  {
+    "id": 192,
+    "name": "添加或修改公司公告",
+    "url": "/webapi/v3/ov1/officemanage/notice/add?apihelptype=save",
+    "category": "办公栏目/公司公告/公告对接",
+    "full_path": "办公栏目/公司公告/公告对接/添加或修改公司公告"
+  },
+  {
+    "id": 193,
+    "name": "获取公司公告详情",
+    "url": "/webapi/v3/ov1/officemanage/notice/add?edit=1&apihelptype=get",
+    "category": "办公栏目/公司公告/公告对接",
+    "full_path": "办公栏目/公司公告/公告对接/获取公司公告详情"
+  },
+  {
+    "id": 194,
+    "name": "获取公司公告列表",
+    "url": "/webapi/v3/ov1/officemanage/notice/list",
+    "category": "办公栏目/公司公告/公告对接",
+    "full_path": "办公栏目/公司公告/公告对接/获取公司公告列表"
+  },
+  {
+    "id": 197,
+    "name": "添加或修改工作互动",
+    "url": "/webapi/v3/ov1/officemanage/interaction/add?apihelptype=save",
+    "category": "办公栏目/工作互动/工作互动对接",
+    "full_path": "办公栏目/工作互动/工作互动对接/添加或修改工作互动"
+  },
+  {
+    "id": 198,
+    "name": "获取工作互动详情",
+    "url": "/webapi/v3/ov1/officemanage/interaction/add?edit=1&apihelptype=get",
+    "category": "办公栏目/工作互动/工作互动对接",
+    "full_path": "办公栏目/工作互动/工作互动对接/获取工作互动详情"
+  },
+  {
+    "id": 199,
+    "name": "获取工作互动列表",
+    "url": "/webapi/v3/ov1/officemanage/interaction/list",
+    "category": "办公栏目/工作互动/工作互动对接",
+    "full_path": "办公栏目/工作互动/工作互动对接/获取工作互动列表"
+  },
+  {
+    "id": 200,
+    "name": "获取工作互动交流",
+    "url": "/webapi/v3/ov1/officemanage/interaction/add?__msgid=replysave",
+    "category": "办公栏目/工作互动/工作互动对接",
+    "full_path": "办公栏目/工作互动/工作互动对接/获取工作互动交流"
+  },
+  {
+    "id": 201,
+    "name": "获取工作互动交流回复",
+    "url": "/webapi/v3/ov1/officeManage/interaction/add?__msgid=rebacksave",
+    "category": "办公栏目/工作互动/工作互动对接",
+    "full_path": "办公栏目/工作互动/工作互动对接/获取工作互动交流回复"
+  },
+  {
+    "id": 204,
+    "name": "添加或修改日程",
+    "url": "/webapi/v3/ov1/officemanage/plan/add?apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/添加或修改日程"
+  },
+  {
+    "id": 205,
+    "name": "日程关联客户",
+    "url": "/webapi/v3/ov1/salesManage/custom/list?checktype=radio",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/日程关联客户"
+  },
+  {
+    "id": 206,
+    "name": "日程关联联系人",
+    "url": "/webapi/v3/ov1/salesManage/person/list?checktype=radio",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/日程关联联系人"
+  },
+  {
+    "id": 207,
+    "name": "日程关联项目",
+    "url": "/webapi/v3/ov1/salesManage/chance/list?checktype=radio",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/日程关联项目"
+  },
+  {
+    "id": 208,
+    "name": "获取日程详情",
+    "url": "/webapi/v3/ov1/officemanage/plan/add?edit=1&apihelptype=get",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/获取日程详情"
+  },
+  {
+    "id": 209,
+    "name": "获取日程列表",
+    "url": "/webapi/v3/ov1/officemanage/plan/list",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/获取日程列表"
+  },
+  {
+    "id": 210,
+    "name": "日程洽谈进展",
+    "url": "/webapi/v3/ov1/systemManage/reply?datatype=plan&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/日程洽谈进展"
+  },
+  {
+    "id": 211,
+    "name": "日程总结",
+    "url": "/webapi/v3/ov1/officeManage/plan/summary?apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/日程总结"
+  },
+  {
+    "id": 212,
+    "name": "日程点评",
+    "url": "/webapi/v3/ov1/officeManage/plan/leaderdp?apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/日程点评"
+  },
+  {
+    "id": 213,
+    "name": "添加或修改周报",
+    "url": "/webapi/v3/ov1/officemanage/plan/add_week_month?sort=1&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/添加或修改周报"
+  },
+  {
+    "id": 214,
+    "name": "周报总结",
+    "url": "/webapi/v3/ov1/officeManage/plan/summary?sort=1&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/周报总结"
+  },
+  {
+    "id": 215,
+    "name": "周报点评",
+    "url": "/webapi/v3/ov1/officeManage/plan/leaderdp?sort=1&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/周报点评"
+  },
+  {
+    "id": 216,
+    "name": "获取周报详情",
+    "url": "/webapi/v3/ov1/officemanage/plan/add_week_month?edit=1&sort=1&apihelptype=get",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/获取周报详情"
+  },
+  {
+    "id": 217,
+    "name": "添加或修改月报",
+    "url": "/webapi/v3/ov1/officemanage/plan/add_week_month?sort=2&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/添加或修改月报"
+  },
+  {
+    "id": 218,
+    "name": "月报总结",
+    "url": "/webapi/v3/ov1/officeManage/plan/summary?sort=2&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/月报总结"
+  },
+  {
+    "id": 219,
+    "name": "月报点评",
+    "url": "/webapi/v3/ov1/officeManage/plan/leaderdp?sort=2&apihelptype=save",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/月报点评"
+  },
+  {
+    "id": 220,
+    "name": "获取月报详情",
+    "url": "/webapi/v3/ov1/officemanage/plan/add_week_month?edit=1&sort=2&apihelptype=get",
+    "category": "办公栏目/日程管理/日程对接",
+    "full_path": "办公栏目/日程管理/日程对接/获取月报详情"
+  },
+  {
+    "id": 223,
+    "name": "获取通讯录列表",
+    "url": "/webapi/v3/ov1/officemanage/businesscard/list",
+    "category": "办公栏目/通讯录关联/通讯录对接",
+    "full_path": "办公栏目/通讯录关联/通讯录对接/获取通讯录列表"
+  },
+  {
+    "id": 224,
+    "name": "获取组织架构",
+    "url": "/webapi/v3/ov1/officemanage/businesscard/list?sort=1&reportmodel=tree",
+    "category": "办公栏目/通讯录关联/通讯录对接",
+    "full_path": "办公栏目/通讯录关联/通讯录对接/获取组织架构"
+  },
+  {
+    "id": 225,
+    "name": "获取通讯录详情",
+    "url": "/webapi/v3/ov1/officemanage/businesscard/content?apihelptype=get",
+    "category": "办公栏目/通讯录关联/通讯录对接",
+    "full_path": "办公栏目/通讯录关联/通讯录对接/获取通讯录详情"
+  },
+  {
+    "id": 273,
+    "name": "物料清单添加",
+    "url": "/webapi/v3/produceV2/bom/add",
+    "category": "研发/物料清单/物料清单对接",
+    "full_path": "研发/物料清单/物料清单对接/物料清单添加"
+  },
+  {
+    "id": 274,
+    "name": "物料清单修改",
+    "url": "/webapi/v3/produceV2/bom/edit",
+    "category": "研发/物料清单/物料清单对接",
+    "full_path": "研发/物料清单/物料清单对接/物料清单修改"
+  },
+  {
+    "id": 275,
+    "name": "物料清单删除",
+    "url": "/webapi/v3/produceV2/bom/delete",
+    "category": "研发/物料清单/物料清单对接",
+    "full_path": "研发/物料清单/物料清单对接/物料清单删除"
+  },
+  {
+    "id": 276,
+    "name": "物料清单详情",
+    "url": "/webapi/v3/produceV2/bom/detail",
+    "category": "研发/物料清单/物料清单对接",
+    "full_path": "研发/物料清单/物料清单对接/物料清单详情"
+  },
+  {
+    "id": 277,
+    "name": "物料清单列表",
+    "url": "/webapi/v3/produceV2/bom/list",
+    "category": "研发/物料清单/物料清单对接",
+    "full_path": "研发/物料清单/物料清单对接/物料清单列表"
+  },
+  {
+    "id": 320,
+    "name": "物料替代添加",
+    "url": "/webapi/v3/produce/material/substitution/add",
+    "category": "研发/物料替代/物料替代对接",
+    "full_path": "研发/物料替代/物料替代对接/物料替代添加"
+  },
+  {
+    "id": 321,
+    "name": "物料替代修改",
+    "url": "/webapi/v3/produce/material/substitution/edit",
+    "category": "研发/物料替代/物料替代对接",
+    "full_path": "研发/物料替代/物料替代对接/物料替代修改"
+  },
+  {
+    "id": 322,
+    "name": "物料替代详情",
+    "url": "/webapi/v3/produce/material/substitution/detail",
+    "category": "研发/物料替代/物料替代对接",
+    "full_path": "研发/物料替代/物料替代对接/物料替代详情"
+  },
+  {
+    "id": 323,
+    "name": "物料替代列表",
+    "url": "/webapi/v3/produce/material/substitution/list",
+    "category": "研发/物料替代/物料替代对接",
+    "full_path": "研发/物料替代/物料替代对接/物料替代列表"
+  },
+  {
+    "id": 314,
+    "name": "考勤导入添加",
+    "url": "/webapi/v3/attendance/attendancemanage/record/add",
+    "category": "人资栏目/考勤管理/考勤导入",
+    "full_path": "人资栏目/考勤管理/考勤导入/考勤导入添加"
+  }
+]

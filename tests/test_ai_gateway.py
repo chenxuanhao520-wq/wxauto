@@ -9,9 +9,9 @@ import os
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from ai_gateway.types import LLMRequest, LLMResponse, ProviderConfig
-from ai_gateway.llm_provider import OpenAIProvider, DeepSeekProvider
-from ai_gateway.gateway import AIGateway
+from modules.ai_gateway.types import LLMRequest, LLMResponse, ProviderConfig
+from modules.ai_gateway.llm_provider import OpenAIProvider, DeepSeekProvider
+from modules.ai_gateway.gateway import AIGateway
 
 
 def test_llm_request_creation():

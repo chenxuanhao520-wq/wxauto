@@ -1,266 +1,316 @@
-# 🎯 从这里开始 - 5分钟了解整个系统
+# 🚀 快速开始 - 从这里开始
 
-## 📋 核心问题快速解答
-
-### Q1: 这个系统能做什么？
-
-**A**: 微信群聊AI客服，自动回答客户问题
-
-- 🤖 支持7个大模型（OpenAI、DeepSeek、Claude等）
-- 🎙️ 支持语音消息（自动转文字）
-- 🖼️ 支持图片消息（OCR识别故障代码）
-- 📊 数据可视化（飞书/钉钉多维表格）
-- 🛡️ 防封号机制（拟人化行为）
+**微信客服中台系统 v2.0 - C/S架构版**
 
 ---
 
-### Q2: 企业微信 vs 个人微信，用哪个？
+## 🎯 5分钟快速上手
 
-**A**: 看场景
+### 第一步: 了解架构
 
-| 场景 | 推荐 | 理由 |
-|------|------|------|
-| **处理语音和图片** | 个人微信 | 更简单直接 |
-| **客户是个人用户** | 个人微信 | 无需改变习惯 |
-| **客户是企业用户** | 企业微信 | 更容易接受 |
-| **长期稳定运营** | 企业微信 | 零封号风险 |
+本系统采用**轻客户端-重服务器**架构：
 
-**我的建议**：
-- 对于充电桩客服 → **个人微信** + 防封措施
-- 已实现完整的防封机制，风险可控
-
----
-
-### Q3: 如何处理客户发送的语音和截图？
-
-**A**: 完整方案已实现
-
-**语音处理**：
 ```
-客户发语音："充电桩显示E03怎么办"
-  ↓ FunASR识别（本地，免费，1秒）
-系统："客户说：充电桩显示E03怎么办"
-  ↓ 知识库检索
-AI："E03是通信故障，请检查..."
+Windows客户端              云服务器
+(只做UI自动化)          (处理所有业务)
+    ~50MB         ←→        可扩展
 ```
 
-**图片处理**：
-```
-客户发截图：屏幕显示"故障代码 E03"
-  ↓ PaddleOCR识别（本地，免费，0.5秒）
-系统："截图显示：故障代码 E03"
-  ↓ 提取故障代码 → 知识库检索
-AI："E03是通信故障..."
-```
+### 第二步: 选择部署方式
 
-**成本**：¥100/月（只付AI费用，语音图片处理免费）
-
----
-
-### Q4: 配置复杂吗？
-
-**A**: 非常简单！
-
-**最简配置**（3行）：
-```bash
-export DEEPSEEK_API_KEY=sk-xxxxx  # 配置大模型
-pip install funasr paddleocr      # 安装语音图片处理
-python main.py                    # 运行
-```
-
-**完整配置**（10分钟）：
-- 看 `INSTALLATION.md`
-
----
-
-## 🚀 三步开始
-
-### 第1步：安装（2分钟）
+#### 方式A: 本地测试（推荐新手）
 
 ```bash
-# 基础依赖
-pip install pyyaml requests openai pytest
+# 1. 启动服务器
+./start_server.sh        # Mac/Linux
+start_server.bat         # Windows
 
-# 多模态支持（语音+图片）
-pip install funasr paddleocr paddlepaddle
+# 2. 启动客户端
+./start_client.sh        # Mac/Linux  
+start_client.bat         # Windows
 ```
 
-### 第2步：配置（1分钟）
+#### 方式B: Docker部署（推荐生产）
 
 ```bash
-# 选一个大模型
-export DEEPSEEK_API_KEY=sk-xxxxx  # 推荐，最便宜
-# 或
-export OPENAI_API_KEY=sk-xxxxx
+# 一键启动服务器
+docker-compose up -d
+
+# 客户端仍在Windows运行
+python client/main_client.py
 ```
-
-### 第3步：运行（2分钟）
-
-```bash
-# 自动初始化
-python quickstart.py
-
-# 启动系统
-python main.py
-```
-
-**完成！** 现在客户可以发送文字、语音、图片，系统都能处理！
 
 ---
 
-## 📚 深入了解
+## 📋 详细步骤
 
-### 功能文档
+### 一、环境准备
 
-| 想了解... | 查看文档 |
-|----------|---------|
-| **所有功能** | `FINAL_GUIDE.md` ⭐⭐⭐ |
-| 语音和图片处理 | `docs/MULTIMODAL_SUPPORT.md` |
-| 充电桩场景方案 | `docs/CHARGING_PILE_SOLUTION.md` |
-| 企业微信对比 | `docs/WECHAT_VS_WEWORK.md` |
-| 防封号指南 | `docs/WECHAT_SAFETY.md` |
-| 大模型配置 | `docs/LLM_PROVIDERS.md` |
-| 多维表格 | `docs/MULTITABLE_INTEGRATION.md` |
-| 对话追踪 | `docs/CONVERSATION_TRACKING.md` |
+#### 服务器端
 
-### 快速导航
+```bash
+# 1. Python 3.9+
+python3 --version
 
-**新手**：
-1. 看本文档（5分钟）
-2. 看 `INSTALLATION.md`（了解安装）
-3. 运行 `python quickstart.py`
+# 2. 安装依赖
+pip install -r requirements_server.txt
 
-**深入使用**：
-1. `FINAL_GUIDE.md` - 完整功能指南
-2. 各专题文档 - 详细说明
+# 主要依赖:
+# - fastapi      # Web框架
+# - uvicorn      # ASGI服务器
+# - pyjwt        # JWT认证
+# - sqlalchemy   # ORM
+```
+
+#### 客户端
+
+```bash
+# 1. Python 3.9+
+python3 --version
+
+# 2. 安装依赖
+pip install -r requirements_client.txt
+
+# 主要依赖:
+# - httpx        # HTTP客户端
+# - cryptography # 加密
+# - pyyaml       # 配置
+# - psutil       # 系统监控
+```
 
 ---
 
-## 🎯 你的场景（充电桩客服）
+### 二、配置系统
 
-### 特点
+#### 1. 配置服务器
 
-- ✅ 客户主要发送：文字、语音、故障截图
-- ✅ 需要识别：故障代码（E01-E99等）
-- ✅ 需要快速：用户等着充电
-- ⚠️ 24小时服务
+创建 `.env` 文件（或使用环境变量）：
 
-### 推荐配置
+```bash
+# 数据库
+DATABASE_URL=postgresql://user:password@localhost:5432/wxauto
+
+# 缓存
+REDIS_URL=redis://localhost:6379/0
+
+# 安全
+SECRET_KEY=your-secret-key-change-me
+
+# AI配置（可选）
+OPENAI_API_KEY=sk-your-key
+DEEPSEEK_API_KEY=sk-your-key
+```
+
+#### 2. 配置客户端
+
+编辑 `client/config/client_config.yaml`:
 
 ```yaml
-# 大模型：性价比优先
-llm:
-  primary: deepseek:chat       # ¥0.1/百万tokens
-  fallback: qwen:qwen-max      # 国内备用
+server:
+  url: "http://localhost:8000"    # 服务器地址
 
-# 多模态：本地处理
-multimodal:
-  asr:
-    enabled: true
-    provider: funasr           # 免费，中文好
-  ocr:
-    enabled: true
-    provider: paddleocr        # 免费，准确率高
-  vision:
-    enabled: false             # 暂不启用（节省成本）
+client:
+  agent_id: "agent_001"            # 客户端唯一ID
+  api_key: "your-api-key-here"     # API密钥（服务器端配置）
+  name: "客服001号"
 
-# 防封号：保守策略
-rate_limit:
-  per_group_per_minute: 15
-  enable_humanize: true
-  enable_rest_time: false      # 24小时服务
-```
+wechat:
+  auto_start: true
+  check_interval: 1                # 每1秒检查新消息
 
-### 知识库准备
+cache:
+  enabled: true                    # 启用本地缓存
+  encryption: true                 # 启用加密
+  cleanup_days: 7                  # 保留7天
 
-```
-充电桩故障代码手册（必须）
-├── E01-E99：故障代码详解
-├── 快速排故指南
-└── 常见问题FAQ
-
-充电桩用户手册
-├── 操作指南
-├── 安全提示
-└── 紧急联系方式
-```
-
-### 预期效果
-
-- 📊 90%+ 的文字、语音、图片消息可正确识别
-- 🤖 85%+ 的常见故障可由AI解决
-- 🔄 15% 复杂问题转人工（正常）
-- 💰 成本：¥100-200/月
-
----
-
-## 💡 成功案例
-
-### 对话示例
-
-```
-[10:30] 客户（语音）："7号桩显示E03，充不了电"
-[10:31] AI："E03是通信故障，请①重新插拔充电枪..."
-[10:33] 客户（图片）：[重启后的正常屏幕]
-[10:33] AI："太好了，现在已经正常了。充电过程中如有问题随时联系我。"
-
-✅ 对话结果：已解决
-✅ 解决方式：AI
-✅ 解决用时：3分钟
-✅ 客户满意度：5分
-```
-
-### 在飞书中看到的数据
-
-```
-今日充电桩故障处理统计
-┌────────────────────────────────┐
-│ 总咨询：127条                   │
-│ ├── 故障代码：89条（70%）       │
-│ ├── 操作咨询：28条（22%）       │
-│ └── 其他：10条（8%）            │
-│                                 │
-│ AI解决率：85%（108/127）        │
-│ 转人工：15条（12%）             │
-│ 平均解决时长：4.2分钟           │
-└────────────────────────────────┘
-
-Top 5故障代码：
-1. E03（通信）- 45次 - AI解决率 92%
-2. E04（过流）- 23次 - AI解决率 87%
-3. E01（过压）- 12次 - AI解决率 90%
-4. F01（系统）- 7次 - 转人工率 100%
-5. W01（警告）- 2次 - AI解决率 100%
+heartbeat:
+  enabled: true
+  interval: 30                     # 每30秒发送心跳
 ```
 
 ---
 
-## 🎊 准备好了吗？
+### 三、启动系统
 
-### 立即开始
+#### 服务器端
 
 ```bash
-# 1. 基础安装
-pip install pyyaml requests openai pytest funasr paddleocr
+# 方式1: 直接运行
+cd server
+python main_server.py
 
-# 2. 配置
-export DEEPSEEK_API_KEY=sk-your-key
+# 方式2: 使用uvicorn（开发模式）
+uvicorn server.main_server:app --reload
 
-# 3. 运行
-python quickstart.py
+# 方式3: Docker
+docker-compose up -d
 ```
 
-### 需要帮助？
+服务器启动后：
+- 服务地址: http://localhost:8000
+- API文档: http://localhost:8000/docs
+- 健康检查: http://localhost:8000/api/v1/health
 
-查看对应文档：
-- 安装问题 → `INSTALLATION.md`
-- 功能使用 → `FINAL_GUIDE.md`
-- 充电桩场景 → `docs/CHARGING_PILE_SOLUTION.md`
+#### 客户端
+
+```bash
+# 启动客户端
+python client/main_client.py
+
+# 客户端会:
+# 1. 连接服务器
+# 2. 认证登录
+# 3. 启动心跳
+# 4. 开始监听微信消息
+```
 
 ---
 
-**系统已完全就绪，开始使用吧！** 🚀
+## 🔍 验证运行
 
-**版本**：v3.1  
-**日期**：2025-10-16
+### 1. 检查服务器
 
+```bash
+# 访问健康检查接口
+curl http://localhost:8000/api/v1/health
+
+# 返回:
+{
+  "status": "healthy",
+  "service": "wx-customer-service",
+  "version": "2.0.0"
+}
+```
+
+### 2. 检查客户端日志
+
+```bash
+# 查看客户端日志
+tail -f logs/client.log
+
+# 应该看到:
+# ✅ 微信自动化初始化成功
+# ✅ 认证成功
+# ✅ 心跳监控已启动
+# ✅ 客户端运行中...
+```
+
+### 3. 测试消息流程
+
+1. 微信发送测试消息
+2. 客户端抓取并上报服务器
+3. 服务器AI生成回复
+4. 客户端发送回复到微信
+
+---
+
+## 🎓 进阶配置
+
+### 启用AI功能
+
+在服务器配置AI API Key:
+
+```bash
+# OpenAI
+export OPENAI_API_KEY=sk-your-key
+
+# DeepSeek（推荐，性价比高）
+export DEEPSEEK_API_KEY=sk-your-key
+
+# 重启服务器生效
+```
+
+### 启用知识库
+
+```bash
+# 上传知识库文档
+python scripts/upload_documents.py --dir /path/to/docs
+
+# 测试知识库
+python scripts/kb_manager.py test "你们的产品有哪些？"
+```
+
+### 启用ERP同步
+
+```bash
+# 配置ERP
+# 编辑 config.yaml 中的 erp_sync 部分
+
+# 启动同步服务
+python scripts/start_erp_sync.py
+```
+
+---
+
+## 📚 下一步
+
+### 新手
+
+1. ✅ 完成快速开始
+2. 📖 阅读 [📘C-S架构部署指南.md](📘C-S架构部署指南.md)
+3. 🎮 查看 [docs/guides/快速开始.md](docs/guides/快速开始.md)
+
+### 开发者
+
+1. 📖 阅读 [🏗️架构设计-C-S分离方案.md](🏗️架构设计-C-S分离方案.md)
+2. 🔍 查看API文档: http://localhost:8000/docs
+3. 💻 参考代码示例: `server/services/` 和 `client/agent/`
+
+### 运维
+
+1. 📊 查看监控: http://localhost:8000/api/v1/stats
+2. 🐳 Docker部署: `docker-compose.yml`
+3. 📈 性能优化: [docs/features/](docs/features/)
+
+---
+
+## ❓ 常见问题
+
+### Q: 客户端无法连接服务器？
+
+A: 检查：
+1. 服务器是否启动: `curl http://localhost:8000/api/v1/health`
+2. 配置文件中的服务器地址是否正确
+3. 防火墙是否放行8000端口
+
+### Q: AI回复都是错误？
+
+A: 检查：
+1. 服务器是否配置了AI API Key
+2. 查看服务器日志: `logs/server.log`
+3. 测试AI网关: `python -m modules.ai_gateway.gateway`
+
+### Q: 如何添加新客户端？
+
+A: 非常简单：
+1. 复制 `client/config/client_config.yaml`
+2. 修改 `agent_id` 为新ID（如agent_002）
+3. 在新的Windows机器运行 `python client/main_client.py`
+
+### Q: 数据存在哪里？
+
+A:
+- 客户端: 本地加密缓存 (`client_cache/`)
+- 服务器: PostgreSQL数据库（集中存储）
+
+---
+
+## 🆘 获取帮助
+
+1. 查看完整文档: [docs/README.md](docs/README.md)
+2. 查看日志文件: `logs/client.log` 和 `logs/server.log`
+3. 提交Issue: GitHub Issues
+
+---
+
+## 🎉 开始使用
+
+```bash
+# 启动服务器
+./start_server.sh
+
+# 启动客户端
+./start_client.sh
+```
+
+**就这么简单！祝使用愉快！** 🚀

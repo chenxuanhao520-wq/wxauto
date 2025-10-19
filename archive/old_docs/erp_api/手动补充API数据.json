@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "process_time": "2025-10-19T12:20:43.485440",
+    "total_apis": 1,
+    "data_source": "manual_extraction",
+    "description": "手动提取和整理的API数据"
+  },
+  "apis": {
+    "获取客户详情": {
+      "name": "获取客户详情",
+      "method": "POST",
+      "endpoint": "/sysa/mobilephone/salesmanage/custom/add.asp?edit=1",
+      "content_type": "application/json",
+      "parameters": [
+        {
+          "字段名称": "edit",
+          "类型": "string",
+          "必填": "否",
+          "描述": "修改模式，是否返回修改模式的数据，默认为空，二次开发时无用"
+        },
+        {
+          "字段名称": "intsort",
+          "类型": "string",
+          "必填": "否",
+          "描述": "客户类型，1: 单位客户、2: 个人客户，该参数也可在URL中定义"
+        },
+        {
+          "字段名称": "ord",
+          "类型": "int",
+          "必填": "否",
+          "描述": "数据唯一标识，整数，泛指当前单据的数据标识值，如客户ID、合同ID等等，可从相应的列表接口获取该值"
+        },
+        {
+          "字段名称": "_insert_rowindex",
+          "类型": "string",
+          "必填": "否",
+          "描述": ""
+        },
+        {
+          "字段名称": "debug",
+          "类型": "string",
+          "必填": "否",
+          "描述": ""
+        }
+      ],
+      "code_example": "import json\nimport requests\n\n# 收集请求数据\ndats = {\n    \"edit\": \"\",          # 修改模式\n    \"intsort\": \"\",       # 客户类型\n    \"ord\": 0,            # 数据唯一标识\n    \"_insert_rowindex\": \"\",\n    \"debug\": \"\"\n}\n\n# 注：本接口采用V1.0版本方式传参, 参数采用的是id-val键值对数组形式\ndatas = [{\"id\": key, \"val\": value} for key, value in dats.items()]\njson_data = {\n    \"session\": \"******\",  # 当接口设置开启了token验证，此字段传鉴权接口返回的Session\n    \"datas\": datas\n}\n\n# 执行网络请求\nurl = \"http://ls1.jmt.ink:46088/sysa/mobilephone/salesmanage/custom/add.asp?edit=1\"\nheaders = {\"Content-Type\": \"application/json\"}\nresponse = requests.post(url, json=json_data, headers=headers)\nresult = response.text\nprint(result)",
+      "return_type": "ZBDocument",
+      "return_description": "接口返回结果统一为ZBDocument类型，该类型包含【接口状态】+【实际业务】两部分。在本接口中，实际业务数据类型为BillClass（单据对象）。",
+      "bill_class_fields": [
+        {
+          "字段名称": "id",
+          "数据类型": "String",
+          "详细说明": "单据类型的Id，一般二次开发扩展用，无实际业务含义"
+        },
+        {
+          "字段名称": "caption",
+          "数据类型": "String",
+          "详细说明": "当前单据的标题"
+        },
+        {
+          "字段名称": "uitype",
+          "数据类型": "String",
+          "详细说明": "UI属性：单据UI标记"
+        },
+        {
+          "字段名称": "value",
+          "数据类型": "String",
+          "详细说明": "数据唯一标识，泛指当前单据的数据标识ID值，如客户ID、合同ID等等"
+        },
+        {
+          "字段名称": "tools",
+          "数据类型": "ASPCollection",
+          "详细说明": "UI属性：当前单据前端操作功能集合，二次开发无用"
+        },
+        {
+          "字段名称": "groups",
+          "数据类型": "ASPCollection",
+          "详细说明": "单据所包含的字段组集合"
+        }
+      ]
+    }
+  }
+}

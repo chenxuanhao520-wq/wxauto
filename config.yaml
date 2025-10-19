@@ -49,6 +49,91 @@ rate_limit:
   per_user_per_30s: 1
   global_per_minute: 100
 
+# ========================================
+# ERP集成配置（智邦国际ERP自动同步）
+# ========================================
+erp_integration:
+  enabled: false                         # 是否启用ERP集成（首次使用请先配置后再启用）
+  base_url: "http://ls1.jmt.ink:46088"   # ERP服务器地址
+  
+  # ERP登录认证
+  auth:
+    username: ""                         # ⚠️ 请填写ERP用户名
+    password: ""                         # ⚠️ 请填写ERP密码
+    auto_login: true
+  
+  # ERP数据拉取配置
+  erp_pull:
+    enabled: true
+    interval: 3600                       # 每小时拉取一次（秒）
+    batch_size: 100
+    incremental: true                    # 增量同步
+  
+  # ERP数据推送配置
+  erp_push:
+    enabled: true
+    interval: 1800                       # 每30分钟推送一次（秒）
+    batch_size: 50
+    auto_sync: true                      # 自动同步（不需要人工审批）
+  
+  # 同步规则配置
+  rules:
+    # 强制同步规则（已下单/签合同/付款）
+    mandatory_sync:
+      enabled: true
+    
+    # 高质量自动同步（质量分≥80）
+    high_quality_sync:
+      enabled: true
+      min_quality_score: 80
+      required_fields:
+        - phone_verified
+        - company_name
+      min_intent_score: 80
+    
+    # 中等质量条件同步
+    medium_quality_sync:
+      enabled: true
+      combinations:
+        - [phone, quote_request]
+        - [company_name, business_license]
+        - [conversation_days>=7, message_count>=50]
+    
+    # 低质量跳过
+    low_quality_skip:
+      enabled: true
+      skip_conditions:
+        - no_basic_info
+        - intent_score<30
+        - message_count<5
+        - marked_as_invalid
+  
+  # 冲突处理策略
+  conflict_resolution:
+    strategy: 'priority_based'           # priority_based/timestamp/manual
+    core_fields:                         # 核心字段以ERP为准
+      - phone
+      - company_name
+      - erp_customer_code
+    local_priority_fields:               # 本地优先字段
+      - wechat_id
+      - wechat_nickname
+      - intent_score
+  
+  # 数据质量控制
+  data_quality:
+    min_score_for_sync: 60               # 最低质量分数（0-100）
+    verify_before_sync: true             # 同步前验证
+    auto_fix_format: true                # 自动修正格式
+  
+  # 其他选项
+  run_on_start: false                    # 启动时立即执行一次同步
+  
+  # 日志配置
+  logging:
+    level: "INFO"                        # DEBUG/INFO/WARNING/ERROR
+    file: "logs/erp_sync.log"
+
 # ACK 配置
 ack:
   enabled: true

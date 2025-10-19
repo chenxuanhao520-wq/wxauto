@@ -8,48 +8,71 @@ venv/
 env/
 ENV/
 .venv
-*.egg-info/
-dist/
-build/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 .DS_Store
 
-# 数据与日志
-data/
-logs/
+# 数据库
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
+
+# 日志
+logs/
 *.log
 
-# 环境变量
+# 缓存
+client_cache/
+*.enc
+.cache/
+
+# 配置（包含密钥）
 .env
-.env.local
-.env.*.local
+*.key
+
+# 临时文件
+*.tmp
+*.temp
+temp/
+tmp/
 
 # 测试
 .pytest_cache/
 .coverage
 htmlcov/
-*.cover
-.hypothesis/
+.tox/
 
-# 导出文件
-exports/
-*.csv
+# Docker
+*.tar
+docker-compose.override.yml
 
-# 临时文件
-*.tmp
+# 知识库数据
+chroma_db/
+vector_db/
+knowledge_base/
+
+# 上传文件
+uploads/
+data/training/
+
+# 打包
+build/
+dist/
+*.egg-info/
+
+# 备份
 *.bak
-*.orig
+backup/
 
-# 微信相关
-wechat_cache/
-
-# 操作系统
+# 系统文件
 Thumbs.db
+.DS_Store
+
+# 不提交API密钥配置
+*_secret.yaml
+*_production.yaml

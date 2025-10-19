@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from storage.db import Database, MessageLog, SessionInfo
+from modules.storage.db import Database, MessageLog, SessionInfo
 
 
 @pytest.fixture

@@ -23,17 +23,20 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
 
-# 添加项目根目录到路径
-sys.path.insert(0, str(Path(__file__).parent))
+# 添加项目根目录和模块路径
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(project_root / 'core'))
+sys.path.insert(0, str(project_root / 'modules'))
 
-from adapters.wxauto_adapter import Message, FakeWxAdapter
-from storage.db import Database, MessageLog, SessionInfo
-from rag.retriever import Retriever, Evidence
-from ai_gateway.gateway import AIGateway
-from conversation_tracker import ConversationTracker, ConversationOutcome
-from adaptive_learning import UserProfiler, PersonalizedPromptGenerator, ContinuousLearner
-from customer_manager import customer_manager, init_default_groups
-from smart_analyzer import smart_analyzer
+from modules.adapters.wxauto_adapter import Message, FakeWxAdapter
+from modules.storage.db import Database, MessageLog, SessionInfo
+from modules.rag.retriever import Retriever, Evidence
+from modules.ai_gateway.gateway import AIGateway
+from core.conversation_tracker import ConversationTracker, ConversationOutcome
+from modules.adaptive_learning import UserProfiler, PersonalizedPromptGenerator, ContinuousLearner
+from core.customer_manager import customer_manager, init_default_groups
+from core.smart_analyzer import smart_analyzer
 
 # 确保日志目录存在
 Path("logs").mkdir(exist_ok=True)
