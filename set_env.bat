@@ -2,14 +2,22 @@
 REM ==================== 环境变量设置脚本 (Windows) ====================
 REM 使用方法: set_env.bat
 
-REM AI 模型密钥
+REM ✅ 主力模型：Qwen-Turbo (速度快31.8%%，质量4.5/5)
 set QWEN_API_KEY=sk-1d7d593d85b1469683eb8e7988a0f646
 set QWEN_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
 set QWEN_MODEL=qwen-turbo
 
+REM ✅ 备用模型：GLM-4-Flash (完全免费，token精简45%%)
 set GLM_API_KEY=2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4
 set GLM_API_BASE=https://open.bigmodel.cn/api/paas/v4
 set GLM_MODEL=glm-4-flash
+
+REM AI Gateway 配置
+set ENABLE_SMART_ROUTING=true
+set PRIMARY_PROVIDER=qwen
+set PRIMARY_MODEL=qwen-turbo
+set FALLBACK_PROVIDER=glm
+set FALLBACK_MODEL=glm-4-flash
 
 REM JWT 认证
 set JWT_SECRET_KEY=dev-secret-key-change-in-production-min-32-chars

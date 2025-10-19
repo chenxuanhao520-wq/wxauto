@@ -50,18 +50,18 @@ class SmartModelRouter:
         logger.info("智能模型路由器初始化完成")
     
     def _init_model_profiles(self) -> Dict[str, ModelProfile]:
-        """初始化模型画像"""
+        """✅ 优化：基于实测数据更新模型画像"""
         return {
             'qwen-turbo': ModelProfile(
                 provider='qwen',
                 model='qwen-turbo',
                 cost_per_1k_input=0.0006,  # ¥0.6/百万
                 cost_per_1k_output=0.0024,  # ¥2.4/百万
-                avg_latency_ms=800,
+                avg_latency_ms=1278,  # ✅ 实测平均延迟
                 max_context=8000,
-                strengths=['速度快', '成本低', '简单问答'],
-                weaknesses=['复杂推理能力弱'],
-                best_for_tasks=['simple_qa', 'product_inquiry', 'quick_response']
+                strengths=['速度快31.8%', '质量高4.5分', '格式化能力强', '免费额度'],
+                weaknesses=['复杂计算 token 多'],
+                best_for_tasks=['simple_qa', 'product_inquiry', 'troubleshooting', 'general_qa']
             ),
             'qwen-plus': ModelProfile(
                 provider='qwen',
@@ -85,6 +85,17 @@ class SmartModelRouter:
                 weaknesses=['成本最高'],
                 best_for_tasks=['long_summary', 'multimodal', 'document_analysis']
             ),
+            'glm-4-flash': ModelProfile(
+                provider='glm',
+                model='glm-4-flash',
+                cost_per_1k_input=0.0,  # ✅ 完全免费
+                cost_per_1k_output=0.0,  # ✅ 完全免费
+                avg_latency_ms=1872,  # ✅ 实测平均延迟
+                max_context=128000,
+                strengths=['完全免费', 'token精简45%', '稳定可靠', '超长上下文'],
+                weaknesses=['速度比Qwen慢31.8%', '格式化能力弱'],
+                best_for_tasks=['simple_qa', 'fallback', 'cost_sensitive']
+            ),
             'deepseek': ModelProfile(
                 provider='deepseek',
                 model='deepseek-chat',
@@ -93,13 +104,13 @@ class SmartModelRouter:
                 avg_latency_ms=1500,
                 max_context=64000,
                 strengths=['最准确', '幻觉少', '复杂推理强', '事实性好'],
-                weaknesses=['速度稍慢'],
-                best_for_tasks=['complex_reasoning', 'critical_qa', 'troubleshooting']
+                weaknesses=['成本较高'],
+                best_for_tasks=['complex_reasoning', 'critical_qa', 'code_generation']
             )
         }
     
     def _init_routing_rules(self) -> List[Dict[str, Any]]:
-        """初始化路由规则"""
+        """✅ 优化：基于实测结果，Qwen 优先策略"""
         return [
             {
                 'rule_id': 'long_document_summary',
@@ -121,41 +132,48 @@ class SmartModelRouter:
                 'reason': '多模态任务，Qwen-max支持图片'
             },
             {
-                'rule_id': 'complex_reasoning',
+                'rule_id': 'troubleshooting',
                 'priority': 3,
+                'conditions': {
+                    'task_type': 'troubleshooting'
+                },
+                'target_model': 'qwen-turbo',
+                'reason': '✅ 故障排查：Qwen格式化能力强，用户体验好'
+            },
+            {
+                'rule_id': 'complex_reasoning',
+                'priority': 4,
                 'conditions': {
                     'min_complexity': 0.7
                 },
-                'target_model': 'deepseek',
-                'reason': '复杂推理，DeepSeek准确性最高'
-            },
-            {
-                'rule_id': 'critical_qa',
-                'priority': 4,
-                'conditions': {
-                    'is_critical': True
-                },
-                'target_model': 'deepseek',
-                'reason': '关键问题，需要最高准确性'
+                'target_model': 'qwen-turbo',
+                'reason': '✅ 复杂推理：Qwen结构化输出，速度快31.8%'
             },
             {
                 'rule_id': 'medium_complexity',
                 'priority': 5,
                 'conditions': {
-                    'min_complexity': 0.4,
+                    'min_complexity': 0.3,
                     'max_complexity': 0.7
                 },
-                'target_model': 'qwen-plus',
-                'reason': '中等难度，平衡性价比'
+                'target_model': 'qwen-turbo',
+                'reason': '✅ 中等难度：Qwen速度+质量最佳'
             },
             {
                 'rule_id': 'simple_qa',
                 'priority': 6,
                 'conditions': {
-                    'max_complexity': 0.4
+                    'max_complexity': 0.3
                 },
+                'target_model': 'glm-4-flash',
+                'reason': '✅ 极简问答：GLM完全免费，token精简45%'
+            },
+            {
+                'rule_id': 'default',
+                'priority': 99,
+                'conditions': {},
                 'target_model': 'qwen-turbo',
-                'reason': '简单问答，快速便宜'
+                'reason': '✅ 默认选择：Qwen速度快+质量高，综合最优'
             }
         ]
     

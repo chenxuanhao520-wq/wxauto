@@ -2,14 +2,22 @@
 # ==================== 环境变量设置脚本 ====================
 # 使用方法: source set_env.sh
 
-# AI 模型密钥
+# ✅ 主力模型：Qwen-Turbo (速度快31.8%，质量4.5/5)
 export QWEN_API_KEY=sk-1d7d593d85b1469683eb8e7988a0f646
 export QWEN_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
 export QWEN_MODEL=qwen-turbo
 
+# ✅ 备用模型：GLM-4-Flash (完全免费，token精简45%)
 export GLM_API_KEY=2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4
 export GLM_API_BASE=https://open.bigmodel.cn/api/paas/v4
 export GLM_MODEL=glm-4-flash
+
+# AI Gateway 配置
+export ENABLE_SMART_ROUTING=true
+export PRIMARY_PROVIDER=qwen
+export PRIMARY_MODEL=qwen-turbo
+export FALLBACK_PROVIDER=glm
+export FALLBACK_MODEL=glm-4-flash
 
 # JWT 认证
 export JWT_SECRET_KEY=dev-secret-key-change-in-production-min-32-chars

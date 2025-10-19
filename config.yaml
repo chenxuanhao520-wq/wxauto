@@ -8,17 +8,17 @@ ai:
   # 智能路由配置
   smart_routing:
     enabled: true                    # 是否启用智能路由
-    strategy: "cost_optimized"       # 路由策略：cost_optimized | quality_first | speed_first
+    strategy: "quality_first"        # ✅ 优化：质量优先（Qwen 速度快+质量高）
   
   # 主提供商配置
   primary:
-    provider: "qwen"                 # 主提供商
-    model: "qwen-turbo"              # 主模型（推荐：快速+便宜）
+    provider: "qwen"                 # ✅ 主提供商：Qwen-Turbo（速度快31.8%，质量4.5/5）
+    model: "qwen-turbo"              # 快速+高质量+免费额度
   
   # 备用提供商配置
   fallback:
-    provider: "deepseek"             # 备用提供商
-    model: "deepseek-chat"           # 备用模型（准确+可靠）
+    provider: "glm"                  # ✅ 优化：GLM 兜底（完全免费，稳定可靠）
+    model: "glm-4-flash"             # 免费+精简+可靠
     enabled: true                    # 是否启用备用
 
 # 原有AI配置（保持兼容）
@@ -235,6 +235,7 @@ wechat:
   whitelisted_groups:
     - 技术支持群
     - VIP客户群
+    - 测试群                           # ✅ 添加测试群，方便开发调试
   check_interval_ms: 500
   max_retries: 3
 

@@ -16,6 +16,10 @@ client:
 wechat:
   auto_start: true                        # 是否自动启动微信
   check_interval: 1                       # 消息检查间隔（秒）
+  whitelisted_groups:                     # ✅ 添加：白名单群聊列表
+    - 技术支持群
+    - VIP客户群
+    - 测试群
   
 # 缓存配置
 cache:
