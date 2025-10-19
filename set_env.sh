@@ -1,0 +1,37 @@
+#!/bin/bash
+# ==================== 环境变量设置脚本 ====================
+# 使用方法: source set_env.sh
+
+# AI 模型密钥
+export QWEN_API_KEY=sk-1d7d593d85b1469683eb8e7988a0f646
+export QWEN_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
+export QWEN_MODEL=qwen-turbo
+
+export GLM_API_KEY=2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4
+export GLM_API_BASE=https://open.bigmodel.cn/api/paas/v4
+export GLM_MODEL=glm-4-flash
+
+# JWT 认证
+export JWT_SECRET_KEY=dev-secret-key-change-in-production-min-32-chars
+export JWT_ALGORITHM=HS256
+export JWT_EXPIRE_MINUTES=1440
+
+# 客户端认证
+export VALID_AGENT_CREDENTIALS=agent_001:test-api-key-001
+
+# 数据库
+export DATABASE_PATH=data/data.db
+
+# 服务器
+export SERVER_HOST=0.0.0.0
+export SERVER_PORT=8000
+
+echo "✅ 环境变量已设置"
+echo "QWEN_API_KEY: ${QWEN_API_KEY:0:20}..."
+echo "GLM_API_KEY: ${GLM_API_KEY:0:20}..."
+echo ""
+echo "现在可以运行:"
+echo "  python3 test_all_fixes.py      # 运行测试"
+echo "  python3 server/main_server.py  # 启动服务器"
+echo "  python3 client/main_client.py  # 启动客户端"
+
