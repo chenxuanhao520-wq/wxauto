@@ -10,14 +10,24 @@ import asyncio
 import logging
 from pathlib import Path
 
-# 设置环境变量
-os.environ['QWEN_API_KEY'] = 'sk-1d7d593d85b1469683eb8e7988a0f646'
-os.environ['QWEN_API_BASE'] = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
-os.environ['QWEN_MODEL'] = 'qwen-turbo'
+# ✅ 从环境变量读取（不再硬编码）
+# 使用前请设置：
+# export QWEN_API_KEY=your-key-here
+# export GLM_API_KEY=your-key-here
 
-os.environ['GLM_API_KEY'] = '2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4'
-os.environ['GLM_API_BASE'] = 'https://open.bigmodel.cn/api/paas/v4'
-os.environ['GLM_MODEL'] = 'glm-4-flash'
+if not os.getenv('QWEN_API_KEY'):
+    os.environ['QWEN_API_KEY'] = 'sk-your-qwen-key-here'  # 仅用于测试，请替换
+if not os.getenv('QWEN_API_BASE'):
+    os.environ['QWEN_API_BASE'] = 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+if not os.getenv('QWEN_MODEL'):
+    os.environ['QWEN_MODEL'] = 'qwen-turbo'
+
+if not os.getenv('GLM_API_KEY'):
+    os.environ['GLM_API_KEY'] = 'your-glm-key-here'  # 仅用于测试，请替换
+if not os.getenv('GLM_API_BASE'):
+    os.environ['GLM_API_BASE'] = 'https://open.bigmodel.cn/api/paas/v4'
+if not os.getenv('GLM_MODEL'):
+    os.environ['GLM_MODEL'] = 'glm-4-flash'
 
 os.environ['JWT_SECRET_KEY'] = 'test-secret-key-for-development-min-32-chars-long'
 os.environ['VALID_AGENT_CREDENTIALS'] = 'agent_001:test-api-key-001'

@@ -8,7 +8,7 @@ import json
 def test_glm_endpoints():
     """测试不同的 GLM API 端点"""
     
-    api_key = "2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4"
+    api_key = os.getenv("GLM_API_KEY", "your-glm-api-key-here")
     
     # 可能的端点
     endpoints = [

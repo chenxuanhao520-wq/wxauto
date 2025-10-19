@@ -2,11 +2,12 @@
 """
 测试智谱 GLM API 配置
 """
+import os
 import requests
 import json
 
 # GLM 配置
-API_KEY = "2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4"
+API_KEY = os.getenv("GLM_API_KEY", "your-glm-api-key-here")
 BASE_URL = "https://open.bigmodel.cn/api/coding/paas/v4"
 
 def test_glm_connection():

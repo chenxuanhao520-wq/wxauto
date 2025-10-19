@@ -1,12 +1,12 @@
 # ==================== AI模型密钥配置 ====================
 
 # Qwen (通义千问)
-QWEN_API_KEY=sk-1d7d593d85b1469683eb8e7988a0f646
+QWEN_API_KEY=sk-your-qwen-api-key-here
 QWEN_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
 QWEN_MODEL=qwen-turbo
 
 # GLM (智谱AI)
-GLM_API_KEY=2853e43adea74724865746c7ddfcd7ad.qp589y9s3P2KRlI4
+GLM_API_KEY=your-glm-api-key-here
 GLM_API_BASE=https://open.bigmodel.cn/api/paas/v4
 GLM_MODEL=glm-4-flash
 

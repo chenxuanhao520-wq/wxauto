@@ -16,6 +16,9 @@ from typing import Dict
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# ✅ 修复：在导入阶段确保日志目录存在
+Path("logs").mkdir(exist_ok=True)
+
 from client.agent.wx_automation import WxAutomation
 from client.api.server_client import ServerClient
 from client.cache.local_cache import LocalCache
@@ -48,7 +51,9 @@ class LightweightAgent:
         self.config = self._load_config(config_file)
         
         # 初始化组件
-        self.wx_automation = WxAutomation()
+        # ✅ 修复：传递白名单群聊列表（从配置读取或使用测试模式）
+        whitelisted_groups = self.config.get('wechat', {}).get('whitelisted_groups', None)
+        self.wx_automation = WxAutomation(whitelisted_groups=whitelisted_groups)
         self.server_client = ServerClient(
             base_url=self.config['server']['url'],
             agent_id=self.config['client']['agent_id'],
@@ -250,12 +255,19 @@ class LightweightAgent:
         if processed:
             remaining = [item for item in queue if item not in processed]
             
-            # 保存更新后的队列
+            # ✅ 修复：保存更新后的队列
             if remaining:
-                # TODO: 更新队列文件
-                pass
+                # 原子更新队列文件
+                import json
+                temp_file = self.local_cache.offline_queue_file.with_suffix('.tmp')
+                json_data = json.dumps(remaining, ensure_ascii=False)
+                encrypted = self.local_cache.cipher.encrypt(json_data.encode())
+                temp_file.write_bytes(encrypted)
+                temp_file.replace(self.local_cache.offline_queue_file)
+                logger.info(f"✅ 离线队列已更新: 剩余 {len(remaining)} 条消息")
             else:
                 self.local_cache.clear_offline_queue()
+                logger.info("✅ 离线队列已清空")
     
     def _get_wx_status(self) -> Dict:
         """获取微信状态（用于心跳）"""

@@ -17,12 +17,26 @@ logger = logging.getLogger(__name__)
 class WxAutomation:
     """微信UI自动化 - 轻量级封装"""
     
-    def __init__(self):
-        """初始化微信自动化"""
+    def __init__(self, whitelisted_groups: list = None):
+        """
+        初始化微信自动化
+        
+        Args:
+            whitelisted_groups: 白名单群聊列表，如果为 None 则使用测试模式
+        """
+        self.wx = None
+        
         try:
-            from modules.adapters.wxauto_adapter import WxAutoAdapter
-            self.wx = WxAutoAdapter()
-            logger.info("✅ 微信自动化初始化成功")
+            if whitelisted_groups:
+                # ✅ 修复：传递必需的 whitelisted_groups 参数
+                from modules.adapters.wxauto_adapter import WxAutoAdapter
+                self.wx = WxAutoAdapter(whitelisted_groups=whitelisted_groups)
+                logger.info("✅ 微信自动化初始化成功")
+            else:
+                # 测试模式：使用假适配器
+                from modules.adapters.wxauto_adapter import FakeWxAdapter
+                self.wx = FakeWxAdapter(whitelisted_groups=["测试群"])
+                logger.info("✅ 微信自动化初始化成功（测试模式）")
         except Exception as e:
             logger.error(f"❌ 微信自动化初始化失败: {e}")
             self.wx = None
@@ -38,28 +52,24 @@ class WxAutomation:
             return []
         
         try:
-            # 调用底层适配器
-            messages = self.wx.GetAllMessage()
-            
-            # 转换为统一格式
+            # ✅ 修复：调用底层适配器的 iter_new_messages()
             formatted_messages = []
-            for msg in messages:
-                # ✅ 修复：为空 ID 生成稳定的唯一标识
-                msg_id = msg.get('id')
-                if not msg_id:
-                    # 使用消息内容生成稳定的 hash ID
-                    content_for_hash = f"{msg.get('chat_id', '')}:{msg.get('timestamp', '')}:{msg.get('content', '')}"
-                    msg_id = hashlib.md5(content_for_hash.encode()).hexdigest()
+            
+            for msg in self.wx.iter_new_messages():
+                # msg 是 Message 对象（来自 wxauto_adapter）
+                # 生成消息 ID
+                content_for_hash = f"{msg.group_id}:{msg.timestamp.isoformat()}:{msg.content}"
+                msg_id = hashlib.md5(content_for_hash.encode()).hexdigest()
                 
                 formatted_messages.append({
                     'id': msg_id,
-                    'chat_id': msg.get('group_id') or msg.get('sender_id', ''),
-                    'sender': msg.get('sender_name', ''),
-                    'content': msg.get('content', ''),
-                    'type': msg.get('type', 'text'),
-                    'timestamp': msg.get('timestamp', datetime.now().isoformat()),
-                    'is_group': bool(msg.get('group_id')),
-                    'is_at_me': msg.get('is_at_me', False)
+                    'chat_id': msg.group_id,
+                    'sender': msg.sender_name,
+                    'content': msg.content,
+                    'type': 'text',
+                    'timestamp': msg.timestamp.isoformat(),
+                    'is_group': True,
+                    'is_at_me': msg.is_at_me
                 })
             
             return formatted_messages
@@ -84,9 +94,11 @@ class WxAutomation:
             return False
         
         try:
-            self.wx.SendMsg(content, chat_id)
-            logger.info(f"✅ 消息已发送: {chat_id[:10]}...")
-            return True
+            # ✅ 修复：调用适配器的 send_text 方法
+            success = self.wx.send_text(group_name=chat_id, text=content)
+            if success:
+                logger.info(f"✅ 消息已发送: {chat_id[:10]}...")
+            return success
         
         except Exception as e:
             logger.error(f"发送消息失败: {e}")

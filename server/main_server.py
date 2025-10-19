@@ -16,6 +16,9 @@ from contextlib import asynccontextmanager
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# ✅ 修复：在导入阶段确保日志目录存在
+Path("logs").mkdir(exist_ok=True)
+
 from server.api import messages, auth, heartbeat, stats
 from server.services.message_service import MessageService
 
