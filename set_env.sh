@@ -34,6 +34,11 @@ export DATABASE_PATH=data/data.db
 export SERVER_HOST=0.0.0.0
 export SERVER_PORT=8000
 
+# 智邦国际 ERP 配置
+export ERP_BASE_URL="http://ls1.jmt.ink:46088"
+export ERP_USERNAME="admin"
+export ERP_PASSWORD="Abcd@1234"
+
 echo "✅ 环境变量已设置"
 echo "QWEN_API_KEY: ${QWEN_API_KEY:0:20}..."
 echo "GLM_API_KEY: ${GLM_API_KEY:0:20}..."

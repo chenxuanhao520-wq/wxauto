@@ -97,6 +97,49 @@ mcp_platform:
           - 创意头脑风暴
           - 逻辑推理
           - 风险评估
+    
+    # 智邦国际 ERP 服务
+    erp_zhibang:
+      provider: "zhibang_erp"
+      type: "local"            # 本地实现，非外部 SSE 服务
+      base_url: "${ERP_BASE_URL:-http://ls1.jmt.ink:46088}"
+      username: "${ERP_USERNAME}"
+      password: "${ERP_PASSWORD}"
+      enabled: true
+      timeout: 30
+      max_retries: 3
+      
+      # 缓存配置
+      cache:
+        enabled: true
+        rules:                 # 不同操作不同缓存时间
+          product_query: 3600  # 产品信息：1小时
+          customer_query: 1800 # 客户信息：30分钟
+          customer_list: 600   # 客户列表：10分钟
+          order_query: 0       # 订单：不缓存（实时性要求高）
+          create_*: 0          # 写操作：不缓存
+          update_*: 0          # 写操作：不缓存
+      
+      # 元数据
+      metadata:
+        description: "智邦国际 ERP 集成服务"
+        base_url: "${ERP_BASE_URL:-http://ls1.jmt.ink:46088}"
+        username: "${ERP_USERNAME}"
+        password: "${ERP_PASSWORD}"
+        tools:
+          - erp_customer_create
+          - erp_customer_update
+          - erp_customer_query
+          - erp_customer_list
+          - erp_order_create
+          - erp_order_query
+          - erp_product_query
+          - erp_sync_customers
+        capabilities:
+          - 客户管理（创建、更新、查询）
+          - 订单管理（创建、查询）
+          - 产品查询
+          - 批量数据同步
   
   # ==================== 缓存配置 ====================
   cache:
