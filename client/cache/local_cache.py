@@ -18,16 +18,18 @@ logger = logging.getLogger(__name__)
 class LocalCache:
     """本地加密缓存"""
     
-    def __init__(self, cache_dir: str = "client_cache", encryption_key: Optional[bytes] = None):
+    def __init__(self, cache_dir: str = "client_cache", encryption_key: Optional[bytes] = None, max_queue_size: int = 1000):
         """
         初始化本地缓存
         
         Args:
             cache_dir: 缓存目录
             encryption_key: 加密密钥（AES-256）
+            max_queue_size: 离线队列最大容量
         """
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.max_queue_size = max_queue_size
         
         # 加密
         if encryption_key:
@@ -115,7 +117,7 @@ class LocalCache:
     
     def add_to_offline_queue(self, message: Dict) -> bool:
         """
-        添加到离线消息队列
+        添加到离线消息队列（带容量限制）
         
         Args:
             message: 消息数据
@@ -127,6 +129,11 @@ class LocalCache:
             # 加载现有队列
             queue = self.get_offline_queue()
             
+            # ✅ 容量限制 (FIFO - 先进先出)
+            if len(queue) >= self.max_queue_size:
+                logger.warning(f"⚠️  离线队列已满 ({self.max_queue_size}条)，丢弃最旧的消息")
+                queue = queue[-(self.max_queue_size - 1):]
+            
             # 添加新消息
             queue.append({
                 'message': message,
@@ -134,12 +141,8 @@ class LocalCache:
                 'retry_count': 0
             })
             
-            # 序列化并加密
-            json_data = json.dumps(queue, ensure_ascii=False)
-            encrypted = self.cipher.encrypt(json_data.encode())
-            
-            # 保存
-            self.offline_queue_file.write_bytes(encrypted)
+            # ✅ 原子性保存（通过临时文件 + 替换）
+            self._save_offline_queue_atomic(queue)
             
             logger.info(f"消息已加入离线队列: {len(queue)}条")
             return True
@@ -147,6 +150,28 @@ class LocalCache:
         except Exception as e:
             logger.error(f"添加离线队列失败: {e}")
             return False
+    
+    def _save_offline_queue_atomic(self, queue: List[Dict]):
+        """
+        原子性保存离线队列
+        
+        使用临时文件 + 原子替换，避免写入过程中断导致数据损坏
+        
+        Args:
+            queue: 队列数据
+        """
+        # 序列化并加密
+        json_data = json.dumps(queue, ensure_ascii=False)
+        encrypted = self.cipher.encrypt(json_data.encode())
+        
+        # 写入临时文件
+        temp_file = self.offline_queue_file.with_suffix('.tmp')
+        temp_file.write_bytes(encrypted)
+        
+        # 原子替换（POSIX 系统保证原子性）
+        temp_file.replace(self.offline_queue_file)
+        
+        logger.debug(f"✅ 原子性保存离线队列: {len(queue)}条")
     
     def get_offline_queue(self) -> List[Dict]:
         """

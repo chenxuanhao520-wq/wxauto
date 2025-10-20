@@ -94,7 +94,17 @@ class Database:
                 detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES
             )
             self.conn.row_factory = sqlite3.Row
-            logger.info(f"数据库已连接: {self.db_path}")
+            
+            # ✅ 性能优化：启用 WAL 模式
+            cursor = self.conn.cursor()
+            cursor.execute('PRAGMA journal_mode=WAL')  # Write-Ahead Logging
+            cursor.execute('PRAGMA synchronous=NORMAL')  # 提高写入性能
+            cursor.execute('PRAGMA cache_size=10000')  # 增大缓存（约40MB）
+            cursor.execute('PRAGMA temp_store=MEMORY')  # 临时表在内存
+            cursor.execute('PRAGMA mmap_size=30000000000')  # 内存映射I/O
+            cursor.close()
+            
+            logger.info(f"✅ 数据库已连接 (WAL模式): {self.db_path}")
         return self.conn
     
     def init_database(self, sql_file: str = "sql/init.sql") -> None:

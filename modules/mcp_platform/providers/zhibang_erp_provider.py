@@ -56,9 +56,103 @@ class ZhibangERPClient:
             return self.login()
         return True
     
+    def list_customers(self, page: int = 1, page_size: int = 20) -> List[Dict]:
+        """获取客户列表"""
+        if not self.ensure_logged_in():
+            logger.error("ERP 未登录，无法获取客户列表")
+            return []
+        
+        try:
+            url = f"{self.base_url}/sysa/mobilephone/salesmanage/custom/list.asp"
+            
+            # 按照智邦 ERP API 文档格式构建完整的参数
+            dats = {
+                "datatype": "",      # 列表模式
+                "stype": "",         # 数据模式
+                "remind": 0,         # 提醒类型
+                "tjly": "",          # 统计来源
+                "tdate1": "",        # 领用开始日期
+                "tdate2": "",        # 领用结束日期
+                "checktype": "",     # 关联客户选择模式
+                "telsort": "",       # 客户分类
+                "Ismode": "",        # 供应商总览标识
+                "a_cateid": "",      # 销售人员
+                "khjz": "",          # 客户价值评估
+                "khhy": "",          # 客户行业
+                "khly": "",          # 客户来源
+                "a_date_0": "",      # 添加开始日期
+                "a_date_1": "",      # 添加结束日期
+                "telord": "",        # 客户id
+                "name": "",          # 客户名称
+                "pym": "",           # 拼音码
+                "khid": "",          # 客户编号
+                "phone": "",         # 办公电话
+                "fax": "",           # 传真
+                "url": "",           # 客户网址
+                "catetype": 0,       # 人员类型
+                "cateid": "",        # 人员选择
+                "ly": "",            # 客户来源
+                "jz": "",            # 价值评估
+                "area": "",          # 客户区域
+                "trade": "",         # 客户行业
+                "address": "",       # 客户地址
+                "zip": "",           # 邮编
+                "intro": "",         # 备注
+                "date1_0": "",       # 添加时间
+                "date1_1": "",       # 添加时间
+                "searchKey": "",     # 快速检索条件
+                "pagesize": page_size,    # 每页记录数
+                "pageindex": page,        # 数据页标
+                "_rpt_sort": ""      # 排序字段
+            }
+            
+            # 转换为 id-val 键值对数组格式
+            datas = [{"id": key, "val": value} for key, value in dats.items()]
+            
+            json_data = {
+                "session": self.session_token,
+                "cmdkey": "refresh",
+                "datas": datas
+            }
+            
+            response = requests.post(
+                url,
+                json=json_data,
+                headers={"Content-Type": "application/json"},
+                timeout=60
+            )
+            
+            result = response.json()
+            
+            if result.get('header', {}).get('status') == 0:
+                # 解析表格数据 - 根据实际 API 响应结构
+                body = result.get('body', {})
+                source = body.get('source', {})
+                table = source.get('table', {})
+                rows_data = table.get('rows', [])
+                cols = table.get('cols', [])
+                
+                # 将原始数组数据转换为字典格式
+                customers = []
+                for row in rows_data:
+                    customer = {}
+                    for i, col in enumerate(cols):
+                        if i < len(row):
+                            customer[col['id']] = row[i]
+                    customers.append(customer)
+                
+                logger.info(f"✅ 获取到 {len(customers)} 个客户")
+                return customers
+            else:
+                logger.error(f"❌ 获取客户列表失败: {result}")
+                return []
+        except Exception as e:
+            logger.error(f"❌ 获取客户列表异常: {e}")
+            return []
+    
     def query_customer(self, customer_code: str = None, phone: str = None) -> Dict:
         """查询客户"""
-        # 这里是简化的实现，实际应该调用真实的 ERP API
+        # 简化实现，返回示例数据
         return {
             "customer_code": customer_code or "C001",
             "name": "示例客户",
@@ -74,6 +168,173 @@ class ZhibangERPClient:
             "price": 1000.00,
             "stock": 100
         }
+    
+    def list_orders(self, page: int = 1, page_size: int = 20, customer_id: str = None) -> List[Dict]:
+        """获取订单列表"""
+        if not self.ensure_logged_in():
+            logger.error("ERP 未登录，无法获取订单列表")
+            return []
+        
+        try:
+            url = f"{self.base_url}/sysa/mobilephone/salesmanage/order/list.asp"
+            
+            # 构建订单查询参数
+            dats = {
+                "datatype": "",      # 数据类型
+                "stype": "",         # 状态类型
+                "remind": 0,         # 提醒类型
+                "tjly": "",          # 统计来源
+                "tdate1": "",        # 开始日期
+                "tdate2": "",        # 结束日期
+                "checktype": "",     # 选择模式
+                "telsort": "",       # 订单分类
+                "Ismode": "",        # 模式标识
+                "a_cateid": "",      # 销售人员
+                "telord": customer_id if customer_id else "",  # 客户ID
+                "name": "",          # 订单名称
+                "pym": "",           # 拼音码
+                "khid": "",          # 客户编号
+                "phone": "",         # 电话
+                "fax": "",           # 传真
+                "url": "",           # 网址
+                "catetype": 0,       # 人员类型
+                "cateid": "",        # 人员选择
+                "ly": "",            # 来源
+                "jz": "",            # 价值评估
+                "area": "",          # 区域
+                "trade": "",         # 行业
+                "address": "",       # 地址
+                "zip": "",           # 邮编
+                "intro": "",         # 备注
+                "date1_0": "",       # 开始时间
+                "date1_1": "",       # 结束时间
+                "searchKey": "",     # 搜索关键字
+                "pagesize": page_size,    # 每页记录数
+                "pageindex": page,        # 页码
+                "_rpt_sort": ""      # 排序字段
+            }
+            
+            # 转换为 id-val 键值对数组格式
+            datas = [{"id": key, "val": value} for key, value in dats.items()]
+            
+            json_data = {
+                "session": self.session_token,
+                "cmdkey": "refresh",
+                "datas": datas
+            }
+            
+            response = requests.post(
+                url,
+                json=json_data,
+                headers={"Content-Type": "application/json"},
+                timeout=60
+            )
+            
+            result = response.json()
+            
+            if result.get('header', {}).get('status') == 0:
+                # 解析表格数据
+                body = result.get('body', {})
+                source = body.get('source', {})
+                table = source.get('table', {})
+                rows_data = table.get('rows', [])
+                cols = table.get('cols', [])
+                
+                # 将原始数组数据转换为字典格式
+                orders = []
+                for row in rows_data:
+                    order = {}
+                    for i, col in enumerate(cols):
+                        if i < len(row):
+                            order[col['id']] = row[i]
+                    orders.append(order)
+                
+                logger.info(f"✅ 获取到 {len(orders)} 个订单")
+                return orders
+            else:
+                logger.error(f"❌ 获取订单列表失败: {result}")
+                return []
+        except Exception as e:
+            logger.error(f"❌ 获取订单列表异常: {e}")
+            return []
+    
+    def list_contracts(self, page: int = 1, page_size: int = 20, customer_id: str = None) -> List[Dict]:
+        """获取合同列表"""
+        if not self.ensure_logged_in():
+            logger.error("ERP 未登录，无法获取合同列表")
+            return []
+        
+        try:
+            url = f"{self.base_url}/sysa/mobilephone/salesmanage/contract/blist.asp"
+            
+            # 构建合同查询参数 - 按照智邦 ERP 合同 API 文档
+            dats = {
+                "stype": 0,          # 列表模式，0=全部，1=待审核，2=即将到期
+                "datatype": "",      # 数据模式
+                "remind": "",        # 提醒类型，14=合同审核，17=员工合同到期
+                "tdate1": "",        # 添加开始日期
+                "tdate2": "",        # 添加结束日期
+                "a_date_0": "",      # 签约开始日期
+                "a_date_1": "",      # 签约结束日期
+                "htbh": "",          # 合同编号（模糊查询）
+                "khmc": customer_id if customer_id else "",  # 客户名称（模糊查询）
+                "htmoney_0": 0,      # 合同金额下限
+                "htmoney_1": 0,      # 合同金额上限
+                "dateQD_0": "",      # 签约日期开始
+                "dateQD_1": "",      # 签约日期结束
+                "dateKS_0": "",      # 合同开始日期开始
+                "dateKS_1": "",      # 合同开始日期结束
+                "dateZZ_0": "",      # 合同结束日期开始
+                "dateZZ_1": "",      # 合同结束日期结束
+                "searchKey": "",     # 快速检索条件
+                "pagesize": page_size,    # 每页记录数
+                "pageindex": page,        # 页码
+                "_rpt_sort": ""      # 排序字段
+            }
+            
+            # 转换为 id-val 键值对数组格式
+            datas = [{"id": key, "val": value} for key, value in dats.items()]
+            
+            json_data = {
+                "session": self.session_token,
+                "cmdkey": "refresh",
+                "datas": datas
+            }
+            
+            response = requests.post(
+                url,
+                json=json_data,
+                headers={"Content-Type": "application/json"},
+                timeout=60
+            )
+            
+            result = response.json()
+            
+            if result.get('header', {}).get('status') == 0:
+                # 解析表格数据
+                body = result.get('body', {})
+                source = body.get('source', {})
+                table = source.get('table', {})
+                rows_data = table.get('rows', [])
+                cols = table.get('cols', [])
+                
+                # 将原始数组数据转换为字典格式
+                contracts = []
+                for row in rows_data:
+                    contract = {}
+                    for i, col in enumerate(cols):
+                        if i < len(row):
+                            contract[col['id']] = row[i]
+                    contracts.append(contract)
+                
+                logger.info(f"✅ 获取到 {len(contracts)} 个合同")
+                return contracts
+            else:
+                logger.error(f"❌ 获取合同列表失败: {result}")
+                return []
+        except Exception as e:
+            logger.error(f"❌ 获取合同列表异常: {e}")
+            return []
 
 
 class ZhibangERPProvider:
@@ -115,6 +376,7 @@ class ZhibangERPProvider:
             "erp_customer_list",
             "erp_order_create",
             "erp_order_query",
+            "erp_contract_query",
             "erp_product_query",
             "erp_sync_customers"
         ]
@@ -150,6 +412,8 @@ class ZhibangERPProvider:
             return await self._order_create(**kwargs)
         elif method == "erp_order_query":
             return await self._order_query(**kwargs)
+        elif method == "erp_contract_query":
+            return await self._contract_query(**kwargs)
         elif method == "erp_product_query":
             return await self._product_query(**kwargs)
         elif method == "erp_sync_customers":
@@ -196,11 +460,11 @@ class ZhibangERPProvider:
                 "error": str(e)
             }
     
-    async def _customer_create(self, customer_data: Dict) -> Dict[str, Any]:
+    async def _customer_create(self, customer_data: Dict, **kwargs) -> Dict[str, Any]:
         """创建客户"""
         return {"success": True, "customer_code": "C_NEW", "message": "客户创建成功（模拟）"}
     
-    async def _customer_update(self, customer_code: str, update_data: Dict) -> Dict[str, Any]:
+    async def _customer_update(self, customer_code: str, update_data: Dict, **kwargs) -> Dict[str, Any]:
         """更新客户"""
         return {"success": True, "message": "客户更新成功（模拟）"}
     
@@ -221,12 +485,8 @@ class ZhibangERPProvider:
             
             logger.info(f"🔍 查询 ERP 客户列表 (页码: {page}, 每页: {page_size})")
             
-            # 调用 ERP API（这里是模拟数据，实际应该调用真实 API）
-            # 未来可以替换为: self.erp_client.list_customers(page, page_size)
-            customers = [
-                {"code": f"C{i:03d}", "name": f"客户{i}", "phone": f"138{i:08d}"} 
-                for i in range(1, page_size + 1)
-            ]
+            # 调用真实的 ERP API
+            customers = self.erp_client.list_customers(page=page, page_size=page_size)
             
             response = {
                 "success": True,
@@ -251,15 +511,99 @@ class ZhibangERPProvider:
                 "error": str(e)
             }
     
-    async def _order_create(self, order_data: Dict) -> Dict[str, Any]:
+    async def _order_create(self, order_data: Dict, **kwargs) -> Dict[str, Any]:
         """创建订单"""
         return {"success": True, "order_code": "O_NEW", "message": "订单创建成功（模拟）"}
     
-    async def _order_query(self, order_code: str) -> Dict[str, Any]:
-        """查询订单"""
-        return {"success": True, "order": {"order_code": order_code, "status": "待处理"}}
+    async def _order_query(self, order_code: str = None, customer_id: str = None, use_cache: bool = False, **kwargs) -> Dict[str, Any]:
+        """查询订单详情或订单列表"""
+        logger.info(f"🔍 查询订单: order_code={order_code}, customer_id={customer_id}")
+        
+        # 调用真实的 ERP API 查询订单
+        orders = self.erp_client.list_orders(
+            page=kwargs.get('page', 1),
+            page_size=kwargs.get('page_size', 20),
+            customer_id=customer_id
+        )
+        
+        if order_code:
+            # 如果指定了订单号，查找特定订单
+            target_order = None
+            for order in orders:
+                if order.get('ord') == order_code or order.get('name') == order_code:
+                    target_order = order
+                    break
+            
+            if target_order:
+                response = {
+                    "success": True,
+                    "order": target_order,
+                    "source": "erp_system"
+                }
+            else:
+                response = {
+                    "success": False,
+                    "message": f"未找到订单: {order_code}",
+                    "source": "erp_system"
+                }
+        else:
+            # 返回订单列表
+            response = {
+                "success": True,
+                "orders": orders,
+                "total": len(orders),
+                "page": kwargs.get('page', 1),
+                "page_size": kwargs.get('page_size', 20),
+                "source": "erp_system"
+            }
+        
+        return response
     
-    async def _product_query(self, product_code: str = None, use_cache: bool = True) -> Dict[str, Any]:
+    async def _contract_query(self, contract_code: str = None, customer_id: str = None, use_cache: bool = False, **kwargs) -> Dict[str, Any]:
+        """查询合同详情或合同列表"""
+        logger.info(f"🔍 查询合同: contract_code={contract_code}, customer_id={customer_id}")
+        
+        # 调用真实的 ERP API 查询合同
+        contracts = self.erp_client.list_contracts(
+            page=kwargs.get('page', 1),
+            page_size=kwargs.get('page_size', 20),
+            customer_id=customer_id
+        )
+        
+        if contract_code:
+            # 如果指定了合同号，查找特定合同
+            target_contract = None
+            for contract in contracts:
+                if contract.get('ord') == contract_code or contract.get('name') == contract_code:
+                    target_contract = contract
+                    break
+            
+            if target_contract:
+                response = {
+                    "success": True,
+                    "contract": target_contract,
+                    "source": "erp_system"
+                }
+            else:
+                response = {
+                    "success": False,
+                    "message": f"未找到合同: {contract_code}",
+                    "source": "erp_system"
+                }
+        else:
+            # 返回合同列表
+            response = {
+                "success": True,
+                "contracts": contracts,
+                "total": len(contracts),
+                "page": kwargs.get('page', 1),
+                "page_size": kwargs.get('page_size', 20),
+                "source": "erp_system"
+            }
+        
+        return response
+    
+    async def _product_query(self, product_code: str = None, use_cache: bool = True, **kwargs) -> Dict[str, Any]:
         """查询产品"""
         try:
             # 尝试从缓存获取
@@ -297,9 +641,9 @@ class ZhibangERPProvider:
                 "error": str(e)
             }
     
-    async def _sync_customers(self, customer_ids: List[str] = None) -> Dict[str, Any]:
+    async def _sync_customers(self, customer_ids: List[str] = None, **kwargs) -> Dict[str, Any]:
         """批量同步客户"""
-        return {"success": True, "synced_count": 0, "message": "批量同步（模拟）"}
+        return {"success": True, "synced_count": len(customer_ids) if customer_ids else 0, "message": "批量同步（模拟）"}
     
     async def health_check(self) -> Dict[str, Any]:
         """健康检查"""

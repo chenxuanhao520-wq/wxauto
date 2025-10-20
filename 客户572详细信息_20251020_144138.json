@@ -1,0 +1,34 @@
+{
+  "customer_info": {
+    "name": "重庆群马科技有限公司",
+    "catename": "超级管理员",
+    "sortname": "经销商",
+    "sort1name": "三级经销商",
+    "personname": "邓小山",
+    "personjob": "",
+    "phone": "",
+    "mobile": "18323410072",
+    "telintro": "谈的很好，让发合同。",
+    "ord": "572",
+    "person": "317",
+    "url": "_url",
+    "personurl": "_url"
+  },
+  "orders": {
+    "success": true,
+    "orders": [],
+    "total": 0,
+    "page": 1,
+    "page_size": 50,
+    "source": "erp_system"
+  },
+  "contracts": {
+    "success": true,
+    "contracts": [],
+    "total": 0,
+    "page": 1,
+    "page_size": 50,
+    "source": "erp_system"
+  },
+  "query_time": "20251020_144138"
+}
