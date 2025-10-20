@@ -27,6 +27,7 @@
 - 知识库RAG检索（向量数据库）
 - 智能规则引擎（客户分级、状态机）
 - ERP双向同步（智邦国际）
+- MCP中台（AIOCR、Sequential Thinking等）
 - 实时统计分析
 
 🔐 **企业级安全**
@@ -217,6 +218,8 @@ wxauto-1/
 | [START_HERE.md](START_HERE.md) | 新手入门指南 |
 | [📘C-S架构部署指南.md](📘C-S架构部署指南.md) | 部署操作手册 ⭐ |
 | [🏗️架构设计-C-S分离方案.md](🏗️架构设计-C-S分离方案.md) | 架构设计文档 |
+| [docs/MCP_INTEGRATION_SUMMARY.md](docs/MCP_INTEGRATION_SUMMARY.md) | MCP中台集成总结 🆕 |
+| [docs/CURSOR_MCP_SETUP.md](docs/CURSOR_MCP_SETUP.md) | Cursor MCP设置指南 🆕 |
 | [docs/README.md](docs/README.md) | 完整文档索引 |
 | [docs/guides/](docs/guides/) | 使用指南 |
 | [docs/features/](docs/features/) | 功能文档 |
@@ -250,7 +253,34 @@ wechat:
 DATABASE_URL=postgresql://user:pass@localhost:5432/wxauto
 REDIS_URL=redis://localhost:6379/0
 SECRET_KEY=your-jwt-secret-key
+
+# AI 模型配置
+QWEN_API_KEY=your-qwen-api-key          # 通义千问 + MCP服务
+GLM_API_KEY=your-glm-api-key            # 智谱AI
+DEEPSEEK_API_KEY=your-deepseek-api-key  # DeepSeek
+OPENAI_API_KEY=your-openai-api-key      # OpenAI
+CLAUDE_API_KEY=your-claude-api-key      # Claude
+
+# JWT 认证
+JWT_SECRET_KEY=your-jwt-secret-key
+VALID_AGENT_CREDENTIALS=agent_001:password1,agent_002:password2
 ```
+
+### MCP 服务配置
+
+MCP (Model Context Protocol) 中台提供额外的AI能力：
+
+```bash
+# 设置环境变量
+source set_env.sh   # Mac/Linux
+set_env.bat         # Windows
+
+# 启用的 MCP 服务：
+# - AIOCR: 文档识别和转换（40+种格式）
+# - Sequential Thinking: 结构化思考和问题分析
+```
+
+详见 [MCP 集成文档](docs/MCP_INTEGRATION_SUMMARY.md)
 
 ---
 

@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "aiocr": {
+      "type": "sse",
+      "url": "https://dashscope.aliyuncs.com/api/v1/mcps/ai-ocr/sse",
+      "headers": {
+        "Authorization": "Bearer ${QWEN_API_KEY}"
+      }
+    },
+    "sequential-thinking": {
+      "type": "sse", 
+      "url": "https://dashscope.aliyuncs.com/api/v1/mcps/sequential-thinking/sse",
+      "headers": {
+        "Authorization": "Bearer ${QWEN_API_KEY}"
+      }
+    }
+  }
+}

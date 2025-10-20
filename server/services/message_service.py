@@ -81,6 +81,17 @@ class MessageService:
             logger.warning(f"⚠️  数据库初始化失败: {e}")
             self.db = None
         
+        # 初始化 MCP 中台
+        try:
+            from modules.mcp_platform import MCPManager
+            self.mcp_manager = MCPManager()
+            self.aiocr_client = self.mcp_manager.get_client("aiocr") if self.mcp_manager.get_service("aiocr") else None
+            logger.info("✅ MCP 中台初始化成功")
+        except Exception as e:
+            logger.warning(f"⚠️ MCP 中台初始化失败: {e}")
+            self.mcp_manager = None
+            self.aiocr_client = None
+        
         # 回复缓存（内存缓存，生产环境应使用Redis）
         self.reply_cache = {}
     
@@ -116,12 +127,22 @@ class MessageService:
             if rule_result:
                 return rule_result
             
-            # 4. 知识库检索
+            # 4. 特殊消息处理（图片、文件）
+            processed_content = content
+            if message.get('type') in ['image', 'file'] and self.aiocr_client:
+                try:
+                    processed_content = await self._process_media_message(message)
+                    if processed_content != content:
+                        logger.info(f"✅ 媒体消息处理成功: {len(processed_content)} 字符")
+                except Exception as e:
+                    logger.warning(f"⚠️ 媒体消息处理失败: {e}")
+            
+            # 5. 知识库检索
             context = ""
             if self.rag:
-                context = await self._retrieve_knowledge(content)
+                context = await self._retrieve_knowledge(processed_content)
             
-            # 5. AI生成回复（使用智能路由）
+            # 6. AI生成回复（使用智能路由）
             if self.ai_gateway:
                 # 构建智能路由的元数据
                 routing_metadata = {
@@ -130,7 +151,7 @@ class MessageService:
                     'message_type': message.get('type', 'text')
                 }
                 
-                reply = await self._generate_reply(content, context, routing_metadata)
+                reply = await self._generate_reply(processed_content, context, routing_metadata)
                 
                 # 6. 保存到数据库
                 await self._save_to_database(agent_id, message, reply)
@@ -268,6 +289,59 @@ class MessageService:
         except Exception as e:
             logger.error(f"AI生成失败: {e}")
             raise
+    
+    async def _process_media_message(self, message: Dict) -> str:
+        """
+        处理媒体消息（图片、文件）
+        使用 MCP AIOCR 进行识别
+        
+        Args:
+            message: 消息数据
+            
+        Returns:
+            处理后的文本内容
+        """
+        message_type = message.get('type', '')
+        file_path = message.get('file_path', '')
+        
+        if not file_path:
+            logger.warning("媒体消息缺少文件路径")
+            return message.get('content', '')
+        
+        try:
+            if message_type == 'image':
+                # 图片 OCR 识别
+                logger.info(f"🖼️ 开始图片 OCR 识别: {file_path}")
+                result = await self.aiocr_client.doc_recognition(file_path)
+                
+                if result.get("success"):
+                    content = result["content"]
+                    logger.info(f"✅ 图片识别成功: {len(content)} 字符")
+                    return f"[图片内容]: {content}"
+                else:
+                    logger.warning(f"⚠️ 图片识别失败: {result.get('error')}")
+                    return message.get('content', '')
+            
+            elif message_type == 'file':
+                # 文件内容识别
+                logger.info(f"📄 开始文件内容识别: {file_path}")
+                result = await self.aiocr_client.doc_recognition(file_path)
+                
+                if result.get("success"):
+                    content = result["content"]
+                    logger.info(f"✅ 文件识别成功: {len(content)} 字符")
+                    return f"[文件内容]: {content}"
+                else:
+                    logger.warning(f"⚠️ 文件识别失败: {result.get('error')}")
+                    return message.get('content', '')
+            
+            else:
+                logger.warning(f"未知的媒体类型: {message_type}")
+                return message.get('content', '')
+        
+        except Exception as e:
+            logger.error(f"❌ 媒体消息处理异常: {e}")
+            return message.get('content', '')
     
     def _is_critical_message(self, content: str) -> bool:
         """判断是否为关键消息"""
