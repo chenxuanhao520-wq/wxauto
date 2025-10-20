@@ -24,8 +24,21 @@ mcp_platform:
       # 缓存配置
       cache:
         enabled: true
-        ttl: 3600              # 缓存有效期：1小时
+        ttl: 3600              # 缓存有效期：1小时（文档内容相对稳定）
         max_size: 1000         # 最大缓存条目数
+      
+      # 限流配置（批处理时使用）
+      rate_limit:
+        enabled: true
+        requests_per_minute: 60    # 每分钟最多60次请求
+        concurrent_requests: 5     # 最多5个并发请求
+        delay_between_requests: 0.5 # 请求间隔0.5秒
+      
+      # 质控配置
+      quality_control:
+        ocr_confidence_threshold: 0.7   # OCR置信度阈值
+        enable_redaction: true          # 启用敏感信息脱敏
+        similarity_threshold: 0.85      # 重复检测相似度阈值
       
       # 熔断器配置（暂未实施）
       circuit_breaker:
@@ -48,6 +61,7 @@ mcp_platform:
           - pptx
           - md
           - jpeg
+          - jpg
           - png
           - bmp
           - gif
