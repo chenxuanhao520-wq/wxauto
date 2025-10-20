@@ -15,12 +15,13 @@ logger = logging.getLogger(__name__)
 class MCPClient:
     """MCP 通用客户端"""
     
-    def __init__(self, service):
+    def __init__(self, service, cache_manager=None):
         self.service = service
         self.endpoint = service.endpoint
         self.api_key = service.api_key
         self.timeout = service.timeout
         self.max_retries = service.max_retries
+        self.cache_manager = cache_manager  # 缓存管理器
     
     async def _make_request(self, method: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
         """

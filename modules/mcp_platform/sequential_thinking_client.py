@@ -17,10 +17,11 @@ logger = logging.getLogger(__name__)
 class SequentialThinkingClient(MCPClient):
     """Sequential Thinking MCP 客户端"""
     
-    def __init__(self, service):
-        super().__init__(service)
+    def __init__(self, service, cache_manager=None):
+        super().__init__(service, cache_manager)
         self.tools = service.metadata.get("tools", [])
         self.description = service.metadata.get("description", "Sequential Thinking 服务")
+        self.cache_ttl = service.cache_config.get("ttl", 1800) if hasattr(service, 'cache_config') else 1800
     
     async def sequential_thinking(
         self, 

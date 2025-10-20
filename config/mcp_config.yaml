@@ -1,0 +1,187 @@
+# MCP 中台配置文件
+# 版本: v1.0
+# 最后更新: 2024年12月
+
+mcp_platform:
+  # ==================== 全局配置 ====================
+  global:
+    default_timeout: 30          # 默认超时时间（秒）
+    default_retries: 3           # 默认重试次数
+    cache_enabled: true          # 是否启用缓存
+    log_level: "INFO"            # 日志级别
+  
+  # ==================== 服务配置 ====================
+  services:
+    # AIOCR 文档识别服务
+    aiocr:
+      provider: "aliyun_bailian"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/ai-ocr/sse"
+      api_key: "${QWEN_API_KEY}"
+      enabled: true
+      timeout: 60
+      max_retries: 3
+      
+      # 缓存配置
+      cache:
+        enabled: true
+        ttl: 3600              # 缓存有效期：1小时
+        max_size: 1000         # 最大缓存条目数
+      
+      # 熔断器配置（暂未实施）
+      circuit_breaker:
+        enabled: false
+        failure_threshold: 5
+        recovery_timeout: 60
+      
+      # 元数据
+      metadata:
+        description: "AI 文档识别服务"
+        supported_formats:
+          - pdf
+          - doc
+          - docx
+          - txt
+          - csv
+          - xls
+          - xlsx
+          - ppt
+          - pptx
+          - md
+          - jpeg
+          - png
+          - bmp
+          - gif
+          - svg
+          - webp
+          - ico
+          - tiff
+          - html
+          - json
+        tools:
+          - doc_recognition
+          - doc_to_markdown
+    
+    # Sequential Thinking 结构化思考服务
+    sequential_thinking:
+      provider: "aliyun_bailian"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/sequential-thinking/sse"
+      api_key: "${QWEN_API_KEY}"
+      enabled: true
+      timeout: 60
+      max_retries: 3
+      
+      # 缓存配置
+      cache:
+        enabled: true
+        ttl: 1800              # 缓存有效期：30分钟
+        max_size: 500          # 最大缓存条目数
+      
+      # 熔断器配置（暂未实施）
+      circuit_breaker:
+        enabled: false
+        failure_threshold: 5
+        recovery_timeout: 60
+      
+      # 元数据
+      metadata:
+        description: "Sequential Thinking 结构化思考服务"
+        tools:
+          - sequential_thinking
+          - problem_decomposition
+          - decision_analysis
+          - creative_brainstorming
+        capabilities:
+          - 结构化问题分析
+          - 问题分解
+          - 决策分析
+          - 创意头脑风暴
+          - 逻辑推理
+          - 风险评估
+  
+  # ==================== 缓存配置 ====================
+  cache:
+    backend: "memory"          # 缓存后端：memory / redis / multi-level
+    
+    # 内存缓存配置
+    memory:
+      max_size: 1000           # 最大缓存条目数
+      default_ttl: 3600        # 默认缓存有效期（秒）
+    
+    # Redis 缓存配置（未来扩展）
+    redis:
+      enabled: false
+      host: "localhost"
+      port: 6379
+      db: 0
+      password: ""
+      prefix: "mcp:"
+      max_connections: 10
+    
+    # 缓存策略
+    strategy:
+      eviction_policy: "lru"   # 淘汰策略：lru / lfu / fifo
+      compression: false       # 是否压缩缓存数据
+      serialize: "json"        # 序列化方式：json / pickle
+  
+  # ==================== 监控配置 ====================
+  monitoring:
+    enabled: true
+    metrics:
+      enabled: true
+      collect_interval: 60    # 指标收集间隔（秒）
+    
+    logging:
+      enabled: true
+      level: "INFO"
+      format: "json"
+      file: "logs/mcp_platform.log"
+    
+    alerts:
+      enabled: false          # 告警功能（未来扩展）
+      channels:
+        - email
+        - webhook
+  
+  # ==================== 性能配置 ====================
+  performance:
+    # 连接池配置
+    connection_pool:
+      enabled: true
+      max_size: 10
+      min_size: 2
+      timeout: 30
+    
+    # 限流配置
+    rate_limit:
+      enabled: false          # 限流功能（未来扩展）
+      requests_per_minute: 100
+      burst_size: 20
+    
+    # 批处理配置
+    batch_processing:
+      enabled: false          # 批处理功能（未来扩展）
+      batch_size: 10
+      batch_timeout: 5
+
+# ==================== 环境特定配置 ====================
+profiles:
+  # 开发环境
+  dev:
+    global:
+      log_level: "DEBUG"
+    cache:
+      backend: "memory"
+    monitoring:
+      enabled: true
+  
+  # 生产环境
+  prod:
+    global:
+      log_level: "INFO"
+    cache:
+      backend: "redis"       # 生产环境建议使用 Redis
+    monitoring:
+      enabled: true
+      alerts:
+        enabled: true
+

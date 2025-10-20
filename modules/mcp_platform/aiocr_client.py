@@ -19,18 +19,20 @@ logger = logging.getLogger(__name__)
 class AIOCRClient(MCPClient):
     """AIOCR MCP 客户端"""
     
-    def __init__(self, service):
-        super().__init__(service)
+    def __init__(self, service, cache_manager=None):
+        super().__init__(service, cache_manager)
         self.supported_formats = service.metadata.get("supported_formats", [])
         self.tools = service.metadata.get("tools", [])
+        self.cache_ttl = service.cache_config.get("ttl", 3600) if hasattr(service, 'cache_config') else 3600
     
-    async def doc_recognition(self, file_path: Union[str, Path], filename: Optional[str] = None) -> Dict[str, Any]:
+    async def doc_recognition(self, file_path: Union[str, Path], filename: Optional[str] = None, use_cache: bool = True) -> Dict[str, Any]:
         """
         文档识别 - 将文档转换为文本
         
         Args:
             file_path: 文件路径
             filename: 文件名（可选）
+            use_cache: 是否使用缓存
             
         Returns:
             识别结果字典
@@ -41,6 +43,18 @@ class AIOCRClient(MCPClient):
                 raise FileNotFoundError(f"文件不存在: {file_path}")
             
             filename = filename or file_path.name
+            
+            # 尝试从缓存获取
+            if use_cache and self.cache_manager:
+                cache_key = self.cache_manager._generate_cache_key(
+                    "aiocr", "doc_recognition", 
+                    file_path=str(file_path), 
+                    filename=filename
+                )
+                cached_result = self.cache_manager.get(cache_key)
+                if cached_result is not None:
+                    logger.info(f"📦 使用缓存结果: {filename}")
+                    return cached_result
             
             # 检查文件格式
             file_ext = file_path.suffix.lower().lstrip('.')
@@ -64,7 +78,7 @@ class AIOCRClient(MCPClient):
             
             if result and "content" in result:
                 logger.info(f"✅ 文档识别成功: {filename}")
-                return {
+                response = {
                     "success": True,
                     "filename": filename,
                     "content": result["content"],
@@ -72,6 +86,13 @@ class AIOCRClient(MCPClient):
                     "file_size": len(file_bytes),
                     "format": file_ext
                 }
+                
+                # 存入缓存
+                if use_cache and self.cache_manager:
+                    self.cache_manager.set(cache_key, response, self.cache_ttl)
+                    logger.debug(f"💾 结果已缓存: {filename}")
+                
+                return response
             else:
                 logger.error(f"❌ 文档识别失败: {filename}")
                 return {
@@ -90,13 +111,14 @@ class AIOCRClient(MCPClient):
                 "error": str(e)
             }
     
-    async def doc_to_markdown(self, file_path: Union[str, Path], filename: Optional[str] = None) -> Dict[str, Any]:
+    async def doc_to_markdown(self, file_path: Union[str, Path], filename: Optional[str] = None, use_cache: bool = True) -> Dict[str, Any]:
         """
         文档转 Markdown - 保留格式的文档转换
         
         Args:
             file_path: 文件路径
             filename: 文件名（可选）
+            use_cache: 是否使用缓存
             
         Returns:
             转换结果字典
@@ -107,6 +129,18 @@ class AIOCRClient(MCPClient):
                 raise FileNotFoundError(f"文件不存在: {file_path}")
             
             filename = filename or file_path.name
+            
+            # 尝试从缓存获取
+            if use_cache and self.cache_manager:
+                cache_key = self.cache_manager._generate_cache_key(
+                    "aiocr", "doc_to_markdown",
+                    file_path=str(file_path),
+                    filename=filename
+                )
+                cached_result = self.cache_manager.get(cache_key)
+                if cached_result is not None:
+                    logger.info(f"📦 使用缓存结果: {filename}")
+                    return cached_result
             
             # 读取文件并编码
             file_bytes = file_path.read_bytes()
@@ -125,7 +159,7 @@ class AIOCRClient(MCPClient):
             
             if result and "content" in result:
                 logger.info(f"✅ 文档转换成功: {filename}")
-                return {
+                response = {
                     "success": True,
                     "filename": filename,
                     "content": result["content"],
@@ -133,6 +167,13 @@ class AIOCRClient(MCPClient):
                     "file_size": len(file_bytes),
                     "format": "markdown"
                 }
+                
+                # 存入缓存
+                if use_cache and self.cache_manager:
+                    self.cache_manager.set(cache_key, response, self.cache_ttl)
+                    logger.debug(f"💾 结果已缓存: {filename}")
+                
+                return response
             else:
                 logger.error(f"❌ 文档转换失败: {filename}")
                 return {
