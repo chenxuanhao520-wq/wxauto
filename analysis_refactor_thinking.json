@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "problem": "我有一个微信客服AI中台项目（wxauto-1），经过多次迭代开发，现在需要系统性重构：\n\n【现状】\n- C/S架构智能客服系统（client轻量端 + server FastAPI）\n- 集成：多AI模型、RAG、ERP、MCP中台、知识库\n- 100+文件，功能复杂，边开发边改\n\n【核心问题】\n1. 模块重复：相似功能在不同位置实现\n2. 职责不清：模块边界模糊，耦合高\n3. 产品定位：功能堆砌，缺乏清晰产品线\n4. 技术债务：临时方案、遗留代码、不一致设计\n\n【目录结构】\n- client/: 微信UI自动化、消息采集\n- server/: 消息处理、AI调用\n- modules/: ai_gateway、mcp_platform、rag、erp_sync、customer_hub等\n- web/: 管理界面\n\n【重构目标】\n1. 梳理产品定位与核心价值\n2. 识别并消除重复模块\n3. 明确模块职责，降低耦合\n4. 统一设计模式和规范\n5. 优化配置和部署\n6. 产出清晰架构文档\n\n请分析：产品定位、重复模块识别、重构方案、实施路线图、风险控制",
+  "error": "Illegal header value b'Bearer '"
+}

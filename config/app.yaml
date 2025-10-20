@@ -1,0 +1,326 @@
+# ============================================================
+# Wxauto 智能客服中台 - 统一配置文件 v2.0
+# 合并自：config.yaml + config/mcp_config.yaml + client/config/client_config.yaml
+# ============================================================
+
+# 应用信息
+app:
+  name: "wxauto"
+  version: "2.0.0"
+  product_line: "professional"  # lite | professional | enterprise
+  env: "dev"  # dev | prod
+
+# ============================================================
+# 服务器配置
+# ============================================================
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  debug: true
+  cors_enabled: true
+  jwt_secret: "${JWT_SECRET:-default_secret_change_in_prod}"
+  jwt_expire_hours: 24
+
+# ============================================================
+# 客户端配置
+# ============================================================
+client:
+  server_url: "http://localhost:8000"
+  check_interval_ms: 500
+  max_retries: 3
+  heartbeat_interval_sec: 60
+  offline_queue_max_size: 1000
+  cache:
+    enabled: true
+    encryption: true
+    max_size_mb: 100
+
+# ============================================================
+# 微信配置
+# ============================================================
+wechat:
+  whitelisted_groups:
+    - "技术支持群"
+    - "VIP客户群"
+    - "测试群"
+  check_interval_ms: 500
+  max_retries: 3
+
+# ============================================================
+# AI 配置
+# ============================================================
+ai:
+  # 智能路由
+  smart_routing:
+    enabled: true
+    strategy: "quality_first"  # quality_first | cost_first | speed_first
+  
+  # 主提供商
+  primary:
+    provider: "qwen"
+    model: "qwen-turbo"
+    api_key: "${QWEN_API_KEY}"
+  
+  # 备用提供商
+  fallback:
+    enabled: true
+    provider: "glm"
+    model: "glm-4-flash"
+    api_key: "${GLM_API_KEY}"
+  
+  # 通用参数
+  timeout_ms: 6000
+  max_tokens: 512
+  temperature: 0.3
+  stream: true
+  
+  # 系统提示词
+  system_prompt: |
+    你是一位专业的技术客服，负责解答产品相关问题。
+    - 回答简洁准确，≤400字
+    - 使用①②③分步骤说明
+    - 引用证据时标注文档名和版本
+    - 不确定时主动澄清，不可编造信息
+
+# ============================================================
+# RAG 配置
+# ============================================================
+rag:
+  bm25_topn: 50
+  top_k: 4
+  min_confidence: 0.75
+  medium_confidence: 0.55
+  rerank_model: "bge-reranker-base"
+  embedding:
+    model: "bge-m3"
+    batch_size: 32
+
+# ============================================================
+# MCP 中台配置
+# ============================================================
+mcp:
+  enabled: true
+  platform:
+    default_timeout: 30
+    default_retries: 3
+    log_level: "INFO"
+  
+  # 缓存配置
+  cache:
+    backend: "memory"
+    max_size: 1000
+    default_ttl: 3600
+    eviction_policy: "lru"
+  
+  # 服务列表
+  services:
+    # AIOCR 文档识别
+    aiocr:
+      enabled: true
+      provider: "aliyun_bailian"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/ai-ocr/sse"
+      api_key: "${QWEN_API_KEY}"
+      timeout: 60
+      max_retries: 3
+      cache:
+        enabled: true
+        ttl: 3600
+      rate_limit:
+        requests_per_minute: 60
+        delay_between_requests: 0.5
+      quality_control:
+        ocr_confidence_threshold: 0.7
+        enable_redaction: true
+        similarity_threshold: 0.85
+    
+    # Sequential Thinking
+    sequential_thinking:
+      enabled: true
+      provider: "aliyun_bailian"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/sequential-thinking/sse"
+      api_key: "${QWEN_API_KEY}"
+      timeout: 60
+      max_retries: 3
+      cache:
+        enabled: true
+        ttl: 1800
+    
+    # 智邦 ERP
+    erp_zhibang:
+      enabled: false
+      base_url: "${ERP_BASE_URL:-http://ls1.jmt.ink:46088}"
+      username: "${ERP_USERNAME}"
+      password: "${ERP_PASSWORD}"
+      timeout: 30
+      cache:
+        enabled: true
+        rules:
+          product_query: 3600
+          customer_query: 1800
+          customer_list: 600
+          order_query: 0
+
+# ============================================================
+# 客户管理配置
+# ============================================================
+customer:
+  auto_classification: true
+  priority_levels: [1, 2, 3, 4, 5]
+  default_priority: 3
+  sync_to_erp: false
+  scoring:
+    enabled: true
+    factors:
+      - message_count
+      - conversation_days
+      - intent_score
+      - phone_verified
+
+# ============================================================
+# ERP 集成配置
+# ============================================================
+erp_integration:
+  enabled: false
+  base_url: "http://ls1.jmt.ink:46088"
+  auth:
+    username: ""
+    password: ""
+    auto_login: true
+  pull:
+    enabled: true
+    interval: 3600
+    batch_size: 100
+    incremental: true
+  push:
+    enabled: true
+    interval: 1800
+    batch_size: 50
+    auto_sync: false
+  data_quality:
+    min_score_for_sync: 60
+    verify_before_sync: true
+    auto_fix_format: true
+
+# ============================================================
+# 速率限制
+# ============================================================
+rate_limit:
+  per_group_per_minute: 20
+  per_user_per_30s: 1
+  global_per_minute: 100
+
+# ============================================================
+# ACK 确认配置
+# ============================================================
+ack:
+  enabled: true
+  timeout_ms: 3000
+  message: "收到，处理中……"
+
+# ============================================================
+# 会话配置
+# ============================================================
+session:
+  ttl_minutes: 15
+  summary_max_length: 200
+  max_history_turns: 5
+
+# ============================================================
+# 响应配置
+# ============================================================
+response:
+  max_length: 400
+  split_threshold: 500
+  target_p95_ms: 10000
+
+# ============================================================
+# 置信度阈值
+# ============================================================
+confidence:
+  direct_answer: 0.75
+  clarification: 0.55
+  handoff: 0.55
+
+# ============================================================
+# 禁答域（敏感话题）
+# ============================================================
+forbidden_topics:
+  - "价格"
+  - "报价"
+  - "合同"
+  - "交付时间"
+  - "法律"
+  - "隐私"
+  - "个人信息"
+
+# ============================================================
+# 管理员配置
+# ============================================================
+admin:
+  names:
+    - "管理员"
+    - "系统管理员"
+  commands:
+    mute: "#mute"
+    unmute: "#unmute"
+    status: "#status"
+    debug_on: "#debug on"
+    debug_off: "#debug off"
+    add_kb: "#kb"
+    bind_customer: "#bind"
+
+# ============================================================
+# 数据库配置
+# ============================================================
+database:
+  path: "data/data.db"
+  backup_enabled: true
+  backup_interval_hours: 24
+  wal_mode: true  # SQLite WAL 模式
+
+# ============================================================
+# 日志配置
+# ============================================================
+logging:
+  level: "INFO"
+  format: "json"
+  file: "logs/app.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# ============================================================
+# 监控配置
+# ============================================================
+monitoring:
+  enabled: true
+  metrics:
+    enabled: true
+    collect_interval: 60
+  alerts:
+    enabled: false
+
+# ============================================================
+# 环境特定配置覆盖
+# ============================================================
+profiles:
+  dev:
+    server:
+      debug: true
+    logging:
+      level: "DEBUG"
+    rate_limit:
+      per_group_per_minute: 50
+  
+  prod:
+    server:
+      debug: false
+      workers: 8
+    logging:
+      level: "INFO"
+    database:
+      backup_enabled: true
+    mcp:
+      cache:
+        backend: "redis"  # 生产环境使用Redis
+
