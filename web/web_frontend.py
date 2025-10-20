@@ -36,7 +36,7 @@ except ImportError:
 from modules.storage.db import Database
 from modules.ai_gateway.gateway import AIGateway
 from modules.adapters.wxauto_adapter import FakeWxAdapter
-from core.customer_manager import customer_manager
+from core.customer_service_adapter import customer_manager
 from core.sync_manager import sync_manager
 
 # 创建 Flask 应用

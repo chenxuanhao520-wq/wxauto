@@ -35,7 +35,7 @@ from modules.rag.retriever import Retriever, Evidence
 from modules.ai_gateway.gateway import AIGateway
 from core.conversation_tracker import ConversationTracker, ConversationOutcome
 from modules.adaptive_learning import UserProfiler, PersonalizedPromptGenerator, ContinuousLearner
-from core.customer_manager import customer_manager, init_default_groups
+from core.customer_service_adapter import customer_manager, init_default_groups
 from core.smart_analyzer import smart_analyzer
 
 # 确保日志目录存在

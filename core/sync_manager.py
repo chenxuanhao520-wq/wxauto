@@ -18,9 +18,13 @@ from pathlib import Path
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent))
 
-from customer_manager import customer_manager
-from modules.integrations.feishu_bitable import feishu_sync
-from modules.integrations.dingtalk_bitable import dingtalk_sync
+from customer_service_adapter import customer_manager
+
+# ⚠️ 企业版功能已归档（v3.0恢复）
+# from modules.integrations.feishu_bitable import feishu_sync
+# from modules.integrations.dingtalk_bitable import dingtalk_sync
+feishu_sync = None  # 占位
+dingtalk_sync = None  # 占位
 
 class SyncManager:
     """同步管理器"""

@@ -65,7 +65,7 @@ class MessageService:
         
         # 初始化客户管理
         try:
-            from core.customer_manager import customer_manager
+            from core.customer_service_adapter import customer_manager
             self.customer_manager = customer_manager
             logger.info("✅ 客户管理初始化成功")
         except Exception as e:
