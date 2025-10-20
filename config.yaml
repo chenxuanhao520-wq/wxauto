@@ -1,9 +1,7 @@
 # 环境配置：dev | prod
 env: dev
 
-# LLM 配置
-llm:
-  primary: open# ==================== AI配置 ====================
+# ==================== AI配置 ====================
 ai:
   # 智能路由配置
   smart_routing:
@@ -22,8 +20,9 @@ ai:
     enabled: true                    # 是否启用备用
 
 # 原有AI配置（保持兼容）
-ai_legacy:gpt-4o-mini
-  fallback: deepseek:chat
+ai_legacy:
+  primary: gpt-4o-mini
+  fallback: deepseek-chat
   timeout_ms: 6000
   max_tokens: 512
   temperature: 0.3
