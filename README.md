@@ -89,12 +89,20 @@
 
 ### 方式1: 本地开发
 
-#### 1. 启动服务器
+#### 1. 安装依赖
 
 ```bash
-# 安装依赖
-pip install -r requirements_server.txt
+# 安装基础依赖
+pip install -r requirements.txt
 
+# 安装Plus版微信自动化（推荐）
+pip install wxautox
+wxautox -a [激活码]  # 需要购买激活码
+```
+
+#### 2. 启动服务器
+
+```bash
 # 启动服务器
 ./start_server.sh         # Mac/Linux
 start_server.bat          # Windows
@@ -102,15 +110,19 @@ start_server.bat          # Windows
 # 服务器将在 http://localhost:8000 启动
 ```
 
-#### 2. 启动客户端
+#### 3. 启动客户端
 
 ```bash
-# 安装依赖
-pip install -r requirements_client.txt
-
 # 配置客户端（首次运行）
 # 编辑 client/config/client_config.yaml
 # 设置agent_id和api_key
+
+# Plus版优势
+# ✅ 更高性能: 消息延迟降低90%
+# ✅ 更稳定: 错误率显著降低  
+# ✅ 更多功能: 自定义表情、@所有人等
+# ✅ 专属支持: Plus群技术支持
+# 购买地址: https://docs.wxauto.org/plus.html
 
 # 启动客户端
 ./start_client.sh         # Mac/Linux

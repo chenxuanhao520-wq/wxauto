@@ -74,32 +74,49 @@ class WxAutoAdapter:
     
     def _init_wxauto(self):
         """
-        初始化wxauto，自动检测并使用可用版本
+        初始化wxauto，优先使用Plus版 (wxautox4)
         
-        优先使用Plus版 (wxautox4)，不可用时降级到开源版 (wxauto)
+        基于官方文档:
+        - Plus版: https://docs.wxauto.org/plus.html
+        - 开源版: https://github.com/cluic/wxauto
         """
         try:
-            # 1. 优先尝试Plus版 (wxautox4)
+            # 1. 优先使用Plus版 (wxautox4) - 推荐版本
             if self.use_plus:
                 try:
                     from wxautox4 import WeChat  # Plus版
                     self._wx = WeChat()
                     self.is_plus = True
-                    logger.info("✅ 使用 wxautox4 (Plus版)")
+                    logger.info("✅ 使用 wxautox4 (Plus版) - 推荐版本")
+                    logger.info("📋 Plus版特性: 更高性能、更稳定、更多功能")
                     return
                 except ImportError:
-                    logger.warning("⚠️  wxautox4 未安装，尝试开源版...")
+                    logger.error("❌ wxautox4 未安装！")
+                    logger.error("📦 请安装Plus版: pip install wxautox")
+                    logger.error("🔑 请激活Plus版: wxautox -a [激活码]")
+                    logger.error("📖 购买地址: https://docs.wxauto.org/plus.html")
+                    raise ImportError("wxautox4 未安装，请安装并激活Plus版")
                 except Exception as e:
-                    logger.warning(f"⚠️  wxautox4 初始化失败: {e}，降级到开源版...")
+                    logger.error(f"❌ wxautox4 初始化失败: {e}")
+                    logger.error("💡 请检查激活码是否正确")
+                    raise
             
-            # 2. 使用开源版 (wxauto)
+            # 2. 降级到开源版 (仅在不使用Plus时)
+            logger.warning("⚠️  使用开源版 (wxauto) - 建议升级到Plus版")
             from wxauto import WeChat
             self._wx = WeChat()
             self.is_plus = False
             logger.info("✅ 使用 wxauto (开源版)")
                 
-        except ImportError:
-            logger.error("❌ wxauto 未安装，请运行: pip install wxauto")
+        except ImportError as e:
+            logger.error(f"❌ 导入失败: {e}")
+            if "wxautox4" in str(e):
+                logger.error("💡 解决方案:")
+                logger.error("   1. pip install wxautox")
+                logger.error("   2. wxautox -a [激活码]")
+                logger.error("   3. 购买地址: https://docs.wxauto.org/plus.html")
+            else:
+                logger.error("💡 解决方案: pip install wxauto")
             raise
         except Exception as e:
             logger.error(f"❌ wxauto 初始化失败: {e}")
