@@ -51,48 +51,55 @@ class WxAutoAdapter:
         self,
         whitelisted_groups: List[str],
         enable_humanize: bool = True,
-        version_strategy: str = "auto",  # auto, plus, open_source
-        prefer_plus: bool = True,         # 是否优先使用Plus版
-        fallback_enabled: bool = True     # 是否允许降级
+        version_strategy: str = "plus",  # 默认使用Plus版
+        prefer_plus: bool = True,         # 优先使用Plus版
+        fallback_enabled: bool = True     # 允许降级
     ):
         """
-        初始化wxauto适配器 - 支持双版本智能选择
+        初始化wxauto适配器 - Plus版优先，一步到位
         
         Args:
             whitelisted_groups: 白名单群聊列表
             enable_humanize: 是否启用拟人化（防封号）
-            version_strategy: 版本选择策略
-                - "auto": 自动检测，优先Plus版
-                - "plus": 强制使用Plus版
-                - "open_source": 强制使用开源版
-            prefer_plus: 是否优先使用Plus版（仅在auto模式下有效）
-            fallback_enabled: 是否允许降级（仅在plus模式下有效）
+            version_strategy: 版本选择策略（默认plus）
+            prefer_plus: 是否优先使用Plus版（默认True）
+            fallback_enabled: 是否允许降级（默认True）
         """
         self.whitelisted_groups = whitelisted_groups
         self.my_name: Optional[str] = None
         self._wx: Any = None  # wxauto.WeChat 对象
         self._listening_chats: dict = {}  # 已监听的群聊
         
-        # 版本管理
+        # 版本管理 - Plus版优先
         self.version_strategy = version_strategy
         self.prefer_plus = prefer_plus
         self.fallback_enabled = fallback_enabled
         self.is_plus: bool = False  # 是否为Plus版本
         self.version_info: dict = {}  # 版本信息
         
+        # Plus版功能支持
+        self.plus_features = {
+            'custom_emoji': False,
+            'at_all': False,
+            'merge_forward': False,
+            'background_mode': False,
+            'friend_management': False,
+            'multimedia': False
+        }
+        
         # 拟人化行为控制器
         self.humanize = HumanizeBehavior(enable=enable_humanize)
         
-        # 初始化wxauto
+        # 初始化wxauto - Plus版优先
         self._init_wxauto()
     
     def _init_wxauto(self):
         """
-        智能版本检测和初始化
+        Plus版优先初始化 - 一步到位
         
-        支持三种策略:
-        1. auto: 自动检测，优先Plus版，可降级
-        2. plus: 强制Plus版，失败则报错
+        策略:
+        1. plus: 强制Plus版，失败则报错
+        2. auto: 自动检测，优先Plus版，可降级
         3. open_source: 强制开源版
         """
         logger.info(f"🔍 版本策略: {self.version_strategy}")
@@ -105,7 +112,7 @@ class WxAutoAdapter:
             self._init_auto_detect()
     
     def _init_plus_only(self):
-        """强制使用Plus版"""
+        """强制使用Plus版 - 一步到位"""
         try:
             from wxautox4 import WeChat
             self._wx = WeChat()
@@ -115,8 +122,14 @@ class WxAutoAdapter:
                 "package": "wxautox4",
                 "status": "active"
             }
-            logger.info("✅ 使用 wxautox4 (Plus版) - 强制模式")
+            
+            # 检测Plus版功能支持
+            self._detect_plus_features()
+            
+            logger.info("✅ 使用 wxautox4 (Plus版) - 一步到位")
             logger.info("📋 Plus版特性: 更高性能、更稳定、更多功能")
+            logger.info(f"🎯 支持功能: {list(k for k, v in self.plus_features.items() if v)}")
+            
         except ImportError:
             if self.fallback_enabled:
                 logger.warning("⚠️  Plus版不可用，尝试降级到开源版...")
@@ -181,28 +194,34 @@ class WxAutoAdapter:
         # 2. 降级到开源版
         self._init_open_source()
     
-    def _init_open_source(self):
-        """初始化开源版"""
-        try:
-            from wxauto import WeChat
-            self._wx = WeChat()
-            self.is_plus = False
-            self.version_info = {
-                "version": "open_source",
-                "package": "wxauto",
-                "status": "active",
-                "strategy": "fallback"
-            }
-            logger.info("✅ 使用 wxauto (开源版)")
-            logger.info("💡 提示: 可升级到Plus版获得更好性能")
-            logger.info("📖 购买地址: https://docs.wxauto.org/plus.html")
-        except ImportError:
-            logger.error("❌ wxauto 未安装！")
-            logger.error("💡 解决方案: pip install wxauto")
-            raise
-        except Exception as e:
-            logger.error(f"❌ wxauto 初始化失败: {e}")
-            raise
+    def _detect_plus_features(self):
+        """检测Plus版功能支持"""
+        if not self.is_plus or not self._wx:
+            return
+        
+        # 检测自定义表情包功能
+        self.plus_features['custom_emoji'] = hasattr(self._wx, 'SendCustomEmoji') or hasattr(self._wx, 'send_custom_emoji')
+        
+        # 检测@所有人功能
+        self.plus_features['at_all'] = hasattr(self._wx, 'AtAll') or hasattr(self._wx, 'at_all')
+        
+        # 检测合并转发功能
+        self.plus_features['merge_forward'] = hasattr(self._wx, 'MergeForward') or hasattr(self._wx, 'merge_forward')
+        
+        # 检测后台模式功能
+        self.plus_features['background_mode'] = hasattr(self._wx, 'EnableBackgroundMode') or hasattr(self._wx, 'enable_background_mode')
+        
+        # 检测好友管理功能
+        self.plus_features['friend_management'] = hasattr(self._wx, 'GetFriends') or hasattr(self._wx, 'get_friends')
+        
+        # 检测多媒体消息功能
+        self.plus_features['multimedia'] = (
+            hasattr(self._wx, 'SendImage') or hasattr(self._wx, 'send_image') or
+            hasattr(self._wx, 'SendFile') or hasattr(self._wx, 'send_file') or
+            hasattr(self._wx, 'SendVoice') or hasattr(self._wx, 'send_voice')
+        )
+        
+        logger.info(f"🔍 Plus版功能检测完成: {sum(self.plus_features.values())}/6 个功能可用")
     
     def get_version_info(self) -> dict:
         """获取当前版本信息"""
@@ -439,6 +458,282 @@ class WxAutoAdapter:
     def _normalize_sender_id(sender_name: str) -> str:
         """将发送者名称转换为ID"""
         return sender_name.replace(" ", "_").lower()
+    
+    # ==================== Plus版高级功能 ====================
+    
+    def send_custom_emoji(self, group_name: str, emoji_path: str) -> bool:
+        """
+        发送自定义表情包 (Plus版功能)
+        
+        Args:
+            group_name: 群聊名称
+            emoji_path: 表情包文件路径
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['custom_emoji']:
+            logger.warning("❌ 当前版本不支持自定义表情包功能")
+            return False
+        
+        try:
+            # 拟人化：发送前延迟
+            self.humanize.before_send("表情包")
+            
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'SendCustomEmoji'):
+                self._wx.SendCustomEmoji(emoji_path, who=group_name)
+            elif hasattr(self._wx, 'send_custom_emoji'):
+                self._wx.send_custom_emoji(emoji_path, who=group_name)
+            else:
+                logger.error("❌ 自定义表情包API不可用")
+                return False
+            
+            logger.info(f"✅ 自定义表情包已发送: group={group_name}, emoji={emoji_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 发送自定义表情包失败: {group_name}, {e}")
+            return False
+    
+    def at_all(self, group_name: str, message: str) -> bool:
+        """
+        @所有人 (Plus版功能)
+        
+        Args:
+            group_name: 群聊名称
+            message: 消息内容
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['at_all']:
+            logger.warning("❌ 当前版本不支持@所有人功能")
+            return False
+        
+        try:
+            # 拟人化：发送前延迟
+            self.humanize.before_send(message)
+            
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'AtAll'):
+                self._wx.AtAll(message, who=group_name)
+            elif hasattr(self._wx, 'at_all'):
+                self._wx.at_all(message, who=group_name)
+            else:
+                logger.error("❌ @所有人API不可用")
+                return False
+            
+            logger.info(f"✅ @所有人消息已发送: group={group_name}, len={len(message)}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ @所有人失败: {group_name}, {e}")
+            return False
+    
+    def merge_forward(self, group_name: str, messages: List[dict]) -> bool:
+        """
+        合并转发消息 (Plus版功能)
+        
+        Args:
+            group_name: 群聊名称
+            messages: 要转发的消息列表
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['merge_forward']:
+            logger.warning("❌ 当前版本不支持合并转发功能")
+            return False
+        
+        try:
+            # 拟人化：发送前延迟
+            self.humanize.before_send("合并转发")
+            
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'MergeForward'):
+                self._wx.MergeForward(messages, who=group_name)
+            elif hasattr(self._wx, 'merge_forward'):
+                self._wx.merge_forward(messages, who=group_name)
+            else:
+                logger.error("❌ 合并转发API不可用")
+                return False
+            
+            logger.info(f"✅ 合并转发已发送: group={group_name}, count={len(messages)}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 合并转发失败: {group_name}, {e}")
+            return False
+    
+    def enable_background_mode(self, enabled: bool = True) -> bool:
+        """
+        启用后台模式 (Plus版功能)
+        
+        Args:
+            enabled: 是否启用后台模式
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['background_mode']:
+            logger.warning("❌ 当前版本不支持后台模式功能")
+            return False
+        
+        try:
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'EnableBackgroundMode'):
+                self._wx.EnableBackgroundMode(enabled)
+            elif hasattr(self._wx, 'enable_background_mode'):
+                self._wx.enable_background_mode(enabled)
+            else:
+                logger.error("❌ 后台模式API不可用")
+                return False
+            
+            logger.info(f"✅ 后台模式已{'启用' if enabled else '禁用'}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 后台模式设置失败: {e}")
+            return False
+    
+    def get_friends(self) -> List[dict]:
+        """
+        获取好友列表 (Plus版功能)
+        
+        Returns:
+            List[dict]: 好友列表
+        """
+        if not self.plus_features['friend_management']:
+            logger.warning("❌ 当前版本不支持好友管理功能")
+            return []
+        
+        try:
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'GetFriends'):
+                friends = self._wx.GetFriends()
+            elif hasattr(self._wx, 'get_friends'):
+                friends = self._wx.get_friends()
+            else:
+                logger.error("❌ 好友管理API不可用")
+                return []
+            
+            logger.info(f"✅ 获取好友列表成功: {len(friends)} 个好友")
+            return friends if friends else []
+            
+        except Exception as e:
+            logger.error(f"❌ 获取好友列表失败: {e}")
+            return []
+    
+    def send_image(self, group_name: str, image_path: str, caption: str = "") -> bool:
+        """
+        发送图片 (Plus版功能)
+        
+        Args:
+            group_name: 群聊名称
+            image_path: 图片文件路径
+            caption: 图片说明
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['multimedia']:
+            logger.warning("❌ 当前版本不支持多媒体消息功能")
+            return False
+        
+        try:
+            # 拟人化：发送前延迟
+            self.humanize.before_send("图片")
+            
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'SendImage'):
+                self._wx.SendImage(image_path, who=group_name, caption=caption)
+            elif hasattr(self._wx, 'send_image'):
+                self._wx.send_image(image_path, who=group_name, caption=caption)
+            else:
+                logger.error("❌ 图片发送API不可用")
+                return False
+            
+            logger.info(f"✅ 图片已发送: group={group_name}, image={image_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 发送图片失败: {group_name}, {e}")
+            return False
+    
+    def send_file(self, group_name: str, file_path: str) -> bool:
+        """
+        发送文件 (Plus版功能)
+        
+        Args:
+            group_name: 群聊名称
+            file_path: 文件路径
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['multimedia']:
+            logger.warning("❌ 当前版本不支持多媒体消息功能")
+            return False
+        
+        try:
+            # 拟人化：发送前延迟
+            self.humanize.before_send("文件")
+            
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'SendFile'):
+                self._wx.SendFile(file_path, who=group_name)
+            elif hasattr(self._wx, 'send_file'):
+                self._wx.send_file(file_path, who=group_name)
+            else:
+                logger.error("❌ 文件发送API不可用")
+                return False
+            
+            logger.info(f"✅ 文件已发送: group={group_name}, file={file_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 发送文件失败: {group_name}, {e}")
+            return False
+    
+    def send_voice(self, group_name: str, voice_path: str) -> bool:
+        """
+        发送语音 (Plus版功能)
+        
+        Args:
+            group_name: 群聊名称
+            voice_path: 语音文件路径
+        
+        Returns:
+            bool: 是否成功
+        """
+        if not self.plus_features['multimedia']:
+            logger.warning("❌ 当前版本不支持多媒体消息功能")
+            return False
+        
+        try:
+            # 拟人化：发送前延迟
+            self.humanize.before_send("语音")
+            
+            # 尝试不同的API调用方式
+            if hasattr(self._wx, 'SendVoice'):
+                self._wx.SendVoice(voice_path, who=group_name)
+            elif hasattr(self._wx, 'send_voice'):
+                self._wx.send_voice(voice_path, who=group_name)
+            else:
+                logger.error("❌ 语音发送API不可用")
+                return False
+            
+            logger.info(f"✅ 语音已发送: group={group_name}, voice={voice_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ 发送语音失败: {group_name}, {e}")
+            return False
+    
+    def get_plus_features_status(self) -> dict:
+        """获取Plus版功能状态"""
+        return self.plus_features.copy()
     
     def cleanup(self):
         """清理资源，移除所有监听"""

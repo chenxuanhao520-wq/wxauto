@@ -7,9 +7,9 @@ openai>=1.0.0
 anthropic>=0.18.0  # Claude 支持（可选）
 
 # 微信自动化（仅限Windows平台）
-# 支持双版本：开源版（免费）+ Plus版（付费）
-wxauto>=3.9.0; platform_system == "Windows"     # 开源版（基础功能）
-wxautox>=4.0.0; platform_system == "Windows"   # Plus版（高性能，可选）
+# Plus版优先 - 一步到位集成
+wxautox>=4.0.0; platform_system == "Windows"  # ✅ Plus版 (主要)
+wxauto>=3.9.0; platform_system == "Windows"   # 开源版 (备选)
 
 # 测试框架
 pytest>=7.4.0
@@ -53,18 +53,18 @@ PyJWT>=2.8.0
 # 安装建议
 # ============================================
 # 
-# 基础安装（开源版，免费）：
-#   pip install -r requirements.txt
-#
-# Plus版安装（高性能，付费）：
+# Plus版安装（推荐，一步到位）：
 #   pip install wxautox
 #   wxautox -a [激活码]
 #   购买地址: https://docs.wxauto.org/plus.html
 #
-# 版本选择策略：
-#   - 开发/测试: 使用开源版 (wxauto)
-#   - 生产环境: 推荐Plus版 (wxautox)
-#   - 系统会自动检测可用版本
+# 基础安装（开源版，备选）：
+#   pip install wxauto
+#
+# 版本说明：
+#   - Plus版: 高性能、更多功能、专属支持
+#   - 开源版: 基础功能、免费使用
+#   - 系统默认使用Plus版，不可用时自动降级
 #
 # 企业级知识库（推荐）：
 #   pip install chromadb FlagEmbedding paddleocr pymupdf python-docx

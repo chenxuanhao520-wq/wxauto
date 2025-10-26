@@ -92,12 +92,12 @@
 #### 1. 安装依赖
 
 ```bash
-# 基础安装（开源版，免费）
-pip install -r requirements.txt
-
-# 可选：安装Plus版（高性能，付费）
+# Plus版安装（推荐，一步到位）
 pip install wxautox
 wxautox -a [激活码]  # 需要购买激活码
+
+# 备选：开源版（基础功能）
+pip install wxauto
 ```
 
 #### 2. 启动服务器
@@ -117,10 +117,10 @@ start_server.bat          # Windows
 # 编辑 client/config/client_config.yaml
 # 设置agent_id和api_key
 
-# 版本选择说明
-# ✅ 开源版: 免费，基础功能，适合开发测试
-# ✅ Plus版: 付费，高性能，适合生产环境
-# 🔄 系统会自动检测可用版本
+# 版本说明
+# ✅ Plus版: 高性能、更多功能、专属支持（推荐）
+# ✅ 开源版: 基础功能、免费使用（备选）
+# 🔄 系统默认使用Plus版，不可用时自动降级
 # 📖 Plus版购买: https://docs.wxauto.org/plus.html
 
 # 启动客户端
