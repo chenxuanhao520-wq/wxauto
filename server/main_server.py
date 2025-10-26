@@ -108,18 +108,14 @@ async def health_check():
     }
 
 
+import uvicorn
+from src.api.http_api import app
+
+
+def main(host: str = "0.0.0.0", port: int = 8000):
+    uvicorn.run(app, host=host, port=port)
+
+
 if __name__ == "__main__":
-    import uvicorn
-    
-    # 确保日志目录存在
-    Path("logs").mkdir(exist_ok=True)
-    
-    # 启动服务器
-    uvicorn.run(
-        "main_server:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    main()
 
