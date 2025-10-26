@@ -45,12 +45,11 @@ async def upload_document_with_etl(
     print("=" * 80)
     
     try:
-        # 导入必要模块
-        from modules.kb_platform.etl import DocumentETLPipeline, StructureValidator, FormatNormalizer
-        from modules.kb_platform.processors.document_processor import DocumentProcessor
-        from modules.kb_platform.processors.content_cleaner import ContentCleaner
-        from modules.kb_platform.processors.duplicate_detector import DuplicateDetector
-        from modules.kb_platform.core.quality_controller import QualityController
+        # 导入必要模块（已迁移到RAG模块）
+        print("⚠️  kb_platform模块已废弃，请使用rag模块替代")
+        print("   当前脚本需要重构，暂时跳过执行")
+        print("   请使用 modules/rag/retriever.py 进行文档处理")
+        return None
         
         # 初始化组件
         print("\n📋 初始化ETL组件...")

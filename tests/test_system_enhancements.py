@@ -15,7 +15,7 @@ import time
 from core.system_monitor import SystemMonitor, get_system_monitor
 from core.error_handler import ErrorHandler, ErrorCategory
 from core.performance_optimizer import CacheManager, get_cache
-from modules.learning_loop import KnowledgeLearner
+# from modules.learning_loop import KnowledgeLearner  # 已废弃
 
 
 class TestSystemMonitor(unittest.TestCase):
@@ -146,30 +146,30 @@ class TestCacheManager(unittest.TestCase):
         self.assertIs(cache1, cache2)
 
 
-class TestKnowledgeLearner(unittest.TestCase):
-    """测试知识学习器"""
-    
-    def setUp(self):
-        self.learner = KnowledgeLearner(review_threshold=0.80)
-    
-    def test_process_knowledge(self):
-        """测试知识点处理"""
-        knowledge_points = [
-            {
-                'question': '产品价格是多少？',
-                'answer': '基础版998元',
-                'confidence': 0.85,
-                'type': '价格咨询'
-            }
-        ]
-        
-        result = self.learner.process_knowledge_points(
-            knowledge_points,
-            'test_session'
-        )
-        
-        self.assertIn('auto_added', result)
-        self.assertIn('pending_review', result)
+# class TestKnowledgeLearner(unittest.TestCase):
+#     """测试知识学习器 - 已废弃"""
+#     
+#     def setUp(self):
+#         self.learner = KnowledgeLearner(review_threshold=0.80)
+#     
+#     def test_process_knowledge(self):
+#         """测试知识点处理"""
+#         knowledge_points = [
+#             {
+#                 'question': '产品价格是多少？',
+#                 'answer': '基础版998元',
+#                 'confidence': 0.85,
+#                 'type': '价格咨询'
+#             }
+#         ]
+#         
+#         result = self.learner.process_knowledge_points(
+#             knowledge_points,
+#             'test_session'
+#         )
+#         
+#         self.assertIn('auto_added', result)
+#         self.assertIn('pending_review', result)
 
 
 if __name__ == '__main__':
