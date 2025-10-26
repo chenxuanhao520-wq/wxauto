@@ -1,6 +1,8 @@
 """
 wxauto 适配器：唯一与 PC 微信耦合的文件
 职责：消息监听、发送、@识别、ACK
+
+参考文档: https://github.com/cluic/wxauto
 """
 import re
 import time
@@ -26,12 +28,16 @@ class Message:
     timestamp: datetime
     is_at_me: bool = False
     raw_content: str = ""  # 原始内容（含@符号）
+    msg_type: str = "text"  # 消息类型: text, image, video 等
 
 
 class WxAutoAdapter:
     """
     wxauto 真实适配器
     注意：仅在 Windows + PC 微信环境下可用
+    
+    基于官方 wxauto 文档优化:
+    https://github.com/cluic/wxauto
     """
     
     def __init__(
@@ -47,7 +53,7 @@ class WxAutoAdapter:
         self.whitelisted_groups = whitelisted_groups
         self.my_name: Optional[str] = None
         self._wx: Any = None  # wxauto.WeChat 对象
-        self._last_messages: dict = {}  # 记录每个群的最后消息时间，用于去重
+        self._listening_chats: dict = {}  # 已监听的群聊
         
         # 拟人化行为控制器
         self.humanize = HumanizeBehavior(enable=enable_humanize)
@@ -55,12 +61,12 @@ class WxAutoAdapter:
         try:
             from wxauto import WeChat  # type: ignore
             self._wx = WeChat()
-            logger.info("wxauto 已初始化")
+            logger.info("✅ wxauto 已初始化")
         except ImportError:
-            logger.error("wxauto 未安装，请运行: pip install wxauto")
+            logger.error("❌ wxauto 未安装，请运行: pip install wxauto")
             raise
         except Exception as e:
-            logger.error(f"wxauto 初始化失败: {e}")
+            logger.error(f"❌ wxauto 初始化失败: {e}")
             raise
     
     def get_my_name(self) -> str:
@@ -69,9 +75,8 @@ class WxAutoAdapter:
             return self.my_name
         
         try:
-            # wxauto 可能提供获取当前用户信息的方法
-            # 这里使用占位逻辑，实际需要根据 wxauto API 调整
-            self.my_name = self._wx.GetUserName() if hasattr(self._wx, 'GetUserName') else "小助手"
+            # wxauto 的 GetUserName() 方法
+            self.my_name = self._wx.GetUserName()
             logger.info(f"当前登录微信昵称: {self.my_name}")
         except Exception as e:
             logger.warning(f"无法获取微信昵称，使用默认值: {e}")
@@ -79,93 +84,78 @@ class WxAutoAdapter:
         
         return self.my_name if self.my_name else "小助手"
     
-    def focus_chat(self, chat_name: str) -> bool:
+    def setup_message_listeners(self):
         """
-        切换到指定群聊
-        Args:
-            chat_name: 群聊名称
-        Returns:
-            bool: 是否成功
-        """
-        try:
-            self._wx.ChatWith(chat_name)
-            logger.debug(f"已切换到群聊: {chat_name}")
-            return True
-        except Exception as e:
-            logger.error(f"切换群聊失败: {chat_name}, {e}")
-            return False
-    
-    def iter_new_messages(self) -> Iterator[Message]:
-        """
-        迭代获取白名单群的新消息
-        仅返回被 @ 的消息
-        Yields:
-            Message: 新消息对象
+        为所有白名单群聊设置消息监听
+        
+        基于官方文档的监听机制:
+        https://github.com/cluic/wxauto#2-监听消息
         """
         my_name = self.get_my_name()
         
         for group_name in self.whitelisted_groups:
-            try:
-                if not self.focus_chat(group_name):
-                    continue
-                
-                # 获取最新消息
-                msgs = self._wx.GetAllMessage()
-                
-                if not msgs:
-                    continue
-                
-                # 处理消息列表
-                for msg_data in msgs:
-                    # wxauto 返回的消息格式（需根据实际API调整）:
-                    # msg_data = [发送者, 内容, 时间戳]
-                    if len(msg_data) < 2:
-                        continue
-                    
-                    sender_name = str(msg_data[0]).strip()
-                    content = str(msg_data[1]).strip()
-                    
-                    # 跳过自己的消息
-                    if sender_name == my_name:
-                        continue
-                    
-                    # 检查是否被 @
-                    is_at_me, clean_content = self._check_at_me(content, my_name)
-                    
-                    if not is_at_me:
-                        continue
-                    
-                    # 构建消息对象
-                    msg = Message(
-                        group_id=self._normalize_group_id(group_name),
-                        group_name=group_name,
-                        sender_id=self._normalize_sender_id(sender_name),
-                        sender_name=sender_name,
-                        content=clean_content,
-                        raw_content=content,
-                        timestamp=datetime.now(),
-                        is_at_me=True
-                    )
-                    
-                    # 简单去重：检查是否已处理过相同内容
-                    msg_key = f"{group_name}:{sender_name}:{clean_content}"
-                    if msg_key in self._last_messages:
-                        last_time = self._last_messages[msg_key]
-                        if (datetime.now() - last_time).total_seconds() < 5:
-                            continue
-                    
-                    self._last_messages[msg_key] = datetime.now()
-                    
-                    logger.info(
-                        f"收到@消息: group={group_name}, "
-                        f"sender={sender_name}, content={clean_content[:50]}..."
-                    )
-                    
-                    yield msg
-                    
-            except Exception as e:
-                logger.error(f"获取群消息失败: {group_name}, {e}")
+            if group_name in self._listening_chats:
                 continue
+            
+            try:
+                # 消息处理函数
+                def on_message(msg, chat):
+                    """消息处理回调"""
+                    try:
+                        # 检查是否@我
+                        is_at_me, clean_content = self._check_at_me(msg.content, my_name)
+                        
+                        if not is_at_me:
+                            return
+                        
+                        # 构建消息对象
+                        message = Message(
+                            group_id=self._normalize_group_id(group_name),
+                            group_name=group_name,
+                            sender_id=self._normalize_sender_id(msg.sender),
+                            sender_name=msg.sender,
+                            content=clean_content,
+                            raw_content=msg.content,
+                            timestamp=datetime.now(),
+                            is_at_me=True,
+                            msg_type=getattr(msg, 'type', 'text')
+                        )
+                        
+                        # 将消息存储到队列
+                        if not hasattr(self, '_message_queue'):
+                            self._message_queue = []
+                        self._message_queue.append(message)
+                        
+                        logger.info(
+                            f"收到@消息: {group_name} - {msg.sender}: {clean_content[:50]}..."
+                        )
+                        
+                    except Exception as e:
+                        logger.error(f"处理消息失败: {e}")
+                
+                # 添加监听
+                self._wx.AddListenChat(nickname=group_name, callback=on_message)
+                self._listening_chats[group_name] = on_message
+                
+                logger.info(f"✅ 已为群聊添加监听: {group_name}")
+                
+            except Exception as e:
+                logger.error(f"添加监听失败: {group_name}, {e}")
+    
+    def iter_new_messages(self) -> Iterator[Message]:
+        """
+        迭代获取新消息（从消息队列中取出）
+        
+        Yields:
+            Message: 新消息对象
+        """
+        # 初始化消息队列
+        if not hasattr(self, '_message_queue'):
+            self._message_queue = []
+        
+        # 返回队列中的所有消息
+        while self._message_queue:
+            yield self._message_queue.pop(0)
     
     def send_text(
         self,
@@ -175,17 +165,19 @@ class WxAutoAdapter:
     ) -> bool:
         """
         发送文本消息（拟人化）
+        
+        基于官方文档:
+        https://github.com/cluic/wxauto#1-基本使用
+        
         Args:
             group_name: 群聊名称
             text: 消息文本
             at_user: @的用户名（可选）
+        
         Returns:
             bool: 是否成功
         """
         try:
-            if not self.focus_chat(group_name):
-                return False
-            
             # 拟人化：发送前延迟（模拟思考和打字）
             self.humanize.before_send(text)
             
@@ -196,12 +188,14 @@ class WxAutoAdapter:
             if at_user:
                 text = f"@{at_user} {text}"
             
-            self._wx.SendMsg(text)
-            logger.info(f"消息已发送: group={group_name}, len={len(text)}")
+            # 基于官方API: wx.SendMsg("你好", who="张三")
+            self._wx.SendMsg(text, who=group_name)
+            
+            logger.info(f"✅ 消息已发送: group={group_name}, len={len(text)}")
             return True
             
         except Exception as e:
-            logger.error(f"发送消息失败: {group_name}, {e}")
+            logger.error(f"❌ 发送消息失败: {group_name}, {e}")
             return False
     
     def ack(
@@ -212,10 +206,12 @@ class WxAutoAdapter:
     ) -> bool:
         """
         发送 ACK 确认消息（拟人化）
+        
         Args:
             group_name: 群聊名称
             sender_name: 被 @ 的用户名
             ack_text: ACK 文本（可选，默认随机）
+        
         Returns:
             bool: 是否成功
         """
@@ -225,12 +221,31 @@ class WxAutoAdapter:
         
         return self.send_text(group_name, ack_text, at_user=sender_name)
     
+    def get_current_chat_messages(self) -> List[Any]:
+        """
+        获取当前聊天窗口的所有消息
+        
+        基于官方文档:
+        https://github.com/cluic/wxauto#获取当前聊天窗口消息
+        
+        Returns:
+            List[Any]: 消息列表
+        """
+        try:
+            msgs = self._wx.GetAllMessage()
+            return msgs if msgs else []
+        except Exception as e:
+            logger.error(f"获取消息失败: {e}")
+            return []
+    
     def _check_at_me(self, content: str, my_name: str) -> tuple[bool, str]:
         """
         检查消息是否 @ 了我，并返回清理后的内容
+        
         Args:
             content: 原始消息内容
             my_name: 我的昵称
+        
         Returns:
             (is_at_me, clean_content)
         """
@@ -256,6 +271,17 @@ class WxAutoAdapter:
     def _normalize_sender_id(sender_name: str) -> str:
         """将发送者名称转换为ID"""
         return sender_name.replace(" ", "_").lower()
+    
+    def cleanup(self):
+        """清理资源，移除所有监听"""
+        for group_name, callback in self._listening_chats.items():
+            try:
+                self._wx.RemoveListenChat(nickname=group_name)
+                logger.info(f"已移除监听: {group_name}")
+            except Exception as e:
+                logger.error(f"移除监听失败: {group_name}, {e}")
+        
+        self._listening_chats.clear()
 
 
 class FakeWxAdapter:

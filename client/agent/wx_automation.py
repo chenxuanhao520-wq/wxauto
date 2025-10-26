@@ -31,6 +31,10 @@ class WxAutomation:
                 # ✅ 修复：传递必需的 whitelisted_groups 参数
                 from modules.adapters.wxauto_adapter import WxAutoAdapter
                 self.wx = WxAutoAdapter(whitelisted_groups=whitelisted_groups)
+                
+                # ✅ 新增：设置消息监听器
+                self.wx.setup_message_listeners()
+                
                 logger.info("✅ 微信自动化初始化成功")
             else:
                 # 测试模式：使用假适配器
@@ -66,7 +70,7 @@ class WxAutomation:
                     'chat_id': msg.group_id,
                     'sender': msg.sender_name,
                     'content': msg.content,
-                    'type': 'text',
+                    'type': msg.msg_type,
                     'timestamp': msg.timestamp.isoformat(),
                     'is_group': True,
                     'is_at_me': msg.is_at_me
