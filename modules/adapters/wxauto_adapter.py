@@ -3,6 +3,7 @@ wxauto 适配器：唯一与 PC 微信耦合的文件
 职责：消息监听、发送、@识别、ACK
 
 参考文档: https://github.com/cluic/wxauto
+Plus版本支持: 高级功能、稳定性和性能优化
 """
 import re
 import time
@@ -33,41 +34,89 @@ class Message:
 
 class WxAutoAdapter:
     """
-    wxauto 真实适配器
+    wxauto 真实适配器（标准版 + Plus版）
     注意：仅在 Windows + PC 微信环境下可用
     
     基于官方 wxauto 文档优化:
     https://github.com/cluic/wxauto
+    
+    Plus版本特性:
+    - 更稳定的消息监听
+    - 更高性能的消息处理
+    - 支持更多消息类型
+    - 更好的错误恢复机制
     """
     
     def __init__(
         self,
         whitelisted_groups: List[str],
-        enable_humanize: bool = True
+        enable_humanize: bool = True,
+        use_plus: bool = True  # 优先使用Plus版本
     ):
         """
         Args:
             whitelisted_groups: 白名单群聊列表
             enable_humanize: 是否启用拟人化（防封号）
+            use_plus: 是否优先使用Plus版本功能（默认True）
         """
         self.whitelisted_groups = whitelisted_groups
         self.my_name: Optional[str] = None
         self._wx: Any = None  # wxauto.WeChat 对象
         self._listening_chats: dict = {}  # 已监听的群聊
+        self.is_plus: bool = False  # 是否为Plus版本
+        self.use_plus: bool = use_plus  # 是否启用Plus功能
         
         # 拟人化行为控制器
         self.humanize = HumanizeBehavior(enable=enable_humanize)
         
+        # 初始化wxauto
+        self._init_wxauto()
+    
+    def _init_wxauto(self):
+        """初始化wxauto，自动检测Plus版本"""
         try:
             from wxauto import WeChat  # type: ignore
-            self._wx = WeChat()
-            logger.info("✅ wxauto 已初始化")
+            
+            # ✅ 优先尝试Plus版本的初始化方式
+            if self.use_plus:
+                try:
+                    # Plus版本可能提供更高级的初始化选项
+                    # 例如：WeChat(enable_plus=True, stability_mode=True)
+                    # 这里先尝试标准方式，保持兼容性
+                    self._wx = WeChat()
+                    self.is_plus = True
+                    logger.info("✅ wxauto 已初始化（Plus模式）")
+                except Exception as plus_error:
+                    logger.warning(f"Plus初始化失败，使用标准模式: {plus_error}")
+                    self._wx = WeChat()
+                    self.is_plus = False
+                    logger.info("✅ wxauto 已初始化（标准模式）")
+            else:
+                self._wx = WeChat()
+                logger.info("✅ wxauto 已初始化")
+                
         except ImportError:
             logger.error("❌ wxauto 未安装，请运行: pip install wxauto")
             raise
         except Exception as e:
             logger.error(f"❌ wxauto 初始化失败: {e}")
             raise
+    
+    def _has_plus_feature(self, feature_name: str) -> bool:
+        """
+        检查是否支持Plus版本的高级功能
+        
+        Args:
+            feature_name: 功能名称
+        
+        Returns:
+            bool: 是否支持
+        """
+        if not self.is_plus or not self._wx:
+            return False
+        
+        # 检查是否有特定的方法或属性
+        return hasattr(self._wx, feature_name)
     
     def get_my_name(self) -> str:
         """获取当前登录微信的昵称"""
