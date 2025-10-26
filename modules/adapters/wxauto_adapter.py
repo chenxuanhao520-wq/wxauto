@@ -73,27 +73,30 @@ class WxAutoAdapter:
         self._init_wxauto()
     
     def _init_wxauto(self):
-        """初始化wxauto，自动检测Plus版本"""
+        """
+        初始化wxauto，自动检测并使用可用版本
+        
+        优先使用Plus版 (wxautox4)，不可用时降级到开源版 (wxauto)
+        """
         try:
-            from wxauto import WeChat  # type: ignore
-            
-            # ✅ 优先尝试Plus版本的初始化方式
+            # 1. 优先尝试Plus版 (wxautox4)
             if self.use_plus:
                 try:
-                    # Plus版本可能提供更高级的初始化选项
-                    # 例如：WeChat(enable_plus=True, stability_mode=True)
-                    # 这里先尝试标准方式，保持兼容性
+                    from wxautox4 import WeChat  # Plus版
                     self._wx = WeChat()
                     self.is_plus = True
-                    logger.info("✅ wxauto 已初始化（Plus模式）")
-                except Exception as plus_error:
-                    logger.warning(f"Plus初始化失败，使用标准模式: {plus_error}")
-                    self._wx = WeChat()
-                    self.is_plus = False
-                    logger.info("✅ wxauto 已初始化（标准模式）")
-            else:
-                self._wx = WeChat()
-                logger.info("✅ wxauto 已初始化")
+                    logger.info("✅ 使用 wxautox4 (Plus版)")
+                    return
+                except ImportError:
+                    logger.warning("⚠️  wxautox4 未安装，尝试开源版...")
+                except Exception as e:
+                    logger.warning(f"⚠️  wxautox4 初始化失败: {e}，降级到开源版...")
+            
+            # 2. 使用开源版 (wxauto)
+            from wxauto import WeChat
+            self._wx = WeChat()
+            self.is_plus = False
+            logger.info("✅ 使用 wxauto (开源版)")
                 
         except ImportError:
             logger.error("❌ wxauto 未安装，请运行: pip install wxauto")
