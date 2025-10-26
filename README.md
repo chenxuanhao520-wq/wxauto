@@ -92,10 +92,10 @@
 #### 1. 安装依赖
 
 ```bash
-# 安装基础依赖
+# 基础安装（开源版，免费）
 pip install -r requirements.txt
 
-# 安装Plus版微信自动化（推荐）
+# 可选：安装Plus版（高性能，付费）
 pip install wxautox
 wxautox -a [激活码]  # 需要购买激活码
 ```
@@ -117,12 +117,11 @@ start_server.bat          # Windows
 # 编辑 client/config/client_config.yaml
 # 设置agent_id和api_key
 
-# Plus版优势
-# ✅ 更高性能: 消息延迟降低90%
-# ✅ 更稳定: 错误率显著降低  
-# ✅ 更多功能: 自定义表情、@所有人等
-# ✅ 专属支持: Plus群技术支持
-# 购买地址: https://docs.wxauto.org/plus.html
+# 版本选择说明
+# ✅ 开源版: 免费，基础功能，适合开发测试
+# ✅ Plus版: 付费，高性能，适合生产环境
+# 🔄 系统会自动检测可用版本
+# 📖 Plus版购买: https://docs.wxauto.org/plus.html
 
 # 启动客户端
 ./start_client.sh         # Mac/Linux

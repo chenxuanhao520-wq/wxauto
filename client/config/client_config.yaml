@@ -16,7 +16,10 @@ client:
 wechat:
   auto_start: true                        # 是否自动启动微信
   check_interval: 1                       # 消息检查间隔（秒）
-  use_plus: true                          # ✅ 优先使用Plus版 (wxautox4)
+  # 版本选择策略
+  version_strategy: "auto"                # auto, plus, open_source
+  prefer_plus: true                       # 是否优先使用Plus版
+  fallback_enabled: true                  # 是否允许降级
   whitelisted_groups:                     # ✅ 添加：白名单群聊列表
     - 技术支持群
     - VIP客户群

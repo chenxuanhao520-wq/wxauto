@@ -51,20 +51,34 @@ class WxAutoAdapter:
         self,
         whitelisted_groups: List[str],
         enable_humanize: bool = True,
-        use_plus: bool = True  # 优先使用Plus版本
+        version_strategy: str = "auto",  # auto, plus, open_source
+        prefer_plus: bool = True,         # 是否优先使用Plus版
+        fallback_enabled: bool = True     # 是否允许降级
     ):
         """
+        初始化wxauto适配器 - 支持双版本智能选择
+        
         Args:
             whitelisted_groups: 白名单群聊列表
             enable_humanize: 是否启用拟人化（防封号）
-            use_plus: 是否优先使用Plus版本功能（默认True）
+            version_strategy: 版本选择策略
+                - "auto": 自动检测，优先Plus版
+                - "plus": 强制使用Plus版
+                - "open_source": 强制使用开源版
+            prefer_plus: 是否优先使用Plus版（仅在auto模式下有效）
+            fallback_enabled: 是否允许降级（仅在plus模式下有效）
         """
         self.whitelisted_groups = whitelisted_groups
         self.my_name: Optional[str] = None
         self._wx: Any = None  # wxauto.WeChat 对象
         self._listening_chats: dict = {}  # 已监听的群聊
+        
+        # 版本管理
+        self.version_strategy = version_strategy
+        self.prefer_plus = prefer_plus
+        self.fallback_enabled = fallback_enabled
         self.is_plus: bool = False  # 是否为Plus版本
-        self.use_plus: bool = use_plus  # 是否启用Plus功能
+        self.version_info: dict = {}  # 版本信息
         
         # 拟人化行为控制器
         self.humanize = HumanizeBehavior(enable=enable_humanize)
@@ -74,53 +88,138 @@ class WxAutoAdapter:
     
     def _init_wxauto(self):
         """
-        初始化wxauto，优先使用Plus版 (wxautox4)
+        智能版本检测和初始化
         
-        基于官方文档:
-        - Plus版: https://docs.wxauto.org/plus.html
-        - 开源版: https://github.com/cluic/wxauto
+        支持三种策略:
+        1. auto: 自动检测，优先Plus版，可降级
+        2. plus: 强制Plus版，失败则报错
+        3. open_source: 强制开源版
         """
+        logger.info(f"🔍 版本策略: {self.version_strategy}")
+        
+        if self.version_strategy == "plus":
+            self._init_plus_only()
+        elif self.version_strategy == "open_source":
+            self._init_open_source_only()
+        else:  # auto
+            self._init_auto_detect()
+    
+    def _init_plus_only(self):
+        """强制使用Plus版"""
         try:
-            # 1. 优先使用Plus版 (wxautox4) - 推荐版本
-            if self.use_plus:
-                try:
-                    from wxautox4 import WeChat  # Plus版
-                    self._wx = WeChat()
-                    self.is_plus = True
-                    logger.info("✅ 使用 wxautox4 (Plus版) - 推荐版本")
-                    logger.info("📋 Plus版特性: 更高性能、更稳定、更多功能")
-                    return
-                except ImportError:
-                    logger.error("❌ wxautox4 未安装！")
-                    logger.error("📦 请安装Plus版: pip install wxautox")
-                    logger.error("🔑 请激活Plus版: wxautox -a [激活码]")
-                    logger.error("📖 购买地址: https://docs.wxauto.org/plus.html")
-                    raise ImportError("wxautox4 未安装，请安装并激活Plus版")
-                except Exception as e:
-                    logger.error(f"❌ wxautox4 初始化失败: {e}")
-                    logger.error("💡 请检查激活码是否正确")
-                    raise
-            
-            # 2. 降级到开源版 (仅在不使用Plus时)
-            logger.warning("⚠️  使用开源版 (wxauto) - 建议升级到Plus版")
+            from wxautox4 import WeChat
+            self._wx = WeChat()
+            self.is_plus = True
+            self.version_info = {
+                "version": "plus",
+                "package": "wxautox4",
+                "status": "active"
+            }
+            logger.info("✅ 使用 wxautox4 (Plus版) - 强制模式")
+            logger.info("📋 Plus版特性: 更高性能、更稳定、更多功能")
+        except ImportError:
+            if self.fallback_enabled:
+                logger.warning("⚠️  Plus版不可用，尝试降级到开源版...")
+                self._init_open_source()
+            else:
+                logger.error("❌ wxautox4 未安装！")
+                logger.error("📦 请安装Plus版: pip install wxautox")
+                logger.error("🔑 请激活Plus版: wxautox -a [激活码]")
+                logger.error("📖 购买地址: https://docs.wxauto.org/plus.html")
+                raise ImportError("wxautox4 未安装，请安装并激活Plus版")
+        except Exception as e:
+            logger.error(f"❌ wxautox4 初始化失败: {e}")
+            if self.fallback_enabled:
+                logger.warning("⚠️  尝试降级到开源版...")
+                self._init_open_source()
+            else:
+                raise
+    
+    def _init_open_source_only(self):
+        """强制使用开源版"""
+        try:
             from wxauto import WeChat
             self._wx = WeChat()
             self.is_plus = False
-            logger.info("✅ 使用 wxauto (开源版)")
-                
-        except ImportError as e:
-            logger.error(f"❌ 导入失败: {e}")
-            if "wxautox4" in str(e):
-                logger.error("💡 解决方案:")
-                logger.error("   1. pip install wxautox")
-                logger.error("   2. wxautox -a [激活码]")
-                logger.error("   3. 购买地址: https://docs.wxauto.org/plus.html")
-            else:
-                logger.error("💡 解决方案: pip install wxauto")
+            self.version_info = {
+                "version": "open_source",
+                "package": "wxauto",
+                "status": "active"
+            }
+            logger.info("✅ 使用 wxauto (开源版) - 强制模式")
+            logger.info("💡 提示: 可升级到Plus版获得更好性能")
+        except ImportError:
+            logger.error("❌ wxauto 未安装！")
+            logger.error("💡 解决方案: pip install wxauto")
             raise
         except Exception as e:
             logger.error(f"❌ wxauto 初始化失败: {e}")
             raise
+    
+    def _init_auto_detect(self):
+        """自动检测版本"""
+        # 1. 优先尝试Plus版
+        if self.prefer_plus:
+            try:
+                from wxautox4 import WeChat
+                self._wx = WeChat()
+                self.is_plus = True
+                self.version_info = {
+                    "version": "plus",
+                    "package": "wxautox4",
+                    "status": "active",
+                    "strategy": "auto_preferred"
+                }
+                logger.info("✅ 使用 wxautox4 (Plus版) - 自动检测")
+                logger.info("📋 Plus版特性: 更高性能、更稳定、更多功能")
+                return
+            except ImportError:
+                logger.info("ℹ️  wxautox4 未安装，尝试开源版...")
+            except Exception as e:
+                logger.warning(f"⚠️  wxautox4 初始化失败: {e}，尝试开源版...")
+        
+        # 2. 降级到开源版
+        self._init_open_source()
+    
+    def _init_open_source(self):
+        """初始化开源版"""
+        try:
+            from wxauto import WeChat
+            self._wx = WeChat()
+            self.is_plus = False
+            self.version_info = {
+                "version": "open_source",
+                "package": "wxauto",
+                "status": "active",
+                "strategy": "fallback"
+            }
+            logger.info("✅ 使用 wxauto (开源版)")
+            logger.info("💡 提示: 可升级到Plus版获得更好性能")
+            logger.info("📖 购买地址: https://docs.wxauto.org/plus.html")
+        except ImportError:
+            logger.error("❌ wxauto 未安装！")
+            logger.error("💡 解决方案: pip install wxauto")
+            raise
+        except Exception as e:
+            logger.error(f"❌ wxauto 初始化失败: {e}")
+            raise
+    
+    def get_version_info(self) -> dict:
+        """获取当前版本信息"""
+        return self.version_info.copy()
+    
+    def get_version_status(self) -> str:
+        """获取版本状态描述"""
+        if self.is_plus:
+            return "Plus版 (高性能)"
+        else:
+            return "开源版 (基础功能)"
+    
+    def suggest_upgrade(self) -> str:
+        """获取升级建议"""
+        if not self.is_plus:
+            return "💡 建议升级到Plus版获得更好性能和更多功能\n📖 购买地址: https://docs.wxauto.org/plus.html"
+        return "✅ 已使用Plus版，享受最佳性能"
     
     def _has_plus_feature(self, feature_name: str) -> bool:
         """
