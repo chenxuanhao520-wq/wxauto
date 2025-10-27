@@ -1,0 +1,91 @@
+# 基础依赖
+pyyaml>=6.0
+requests>=2.31.0
+
+# AI & LLM
+openai>=1.0.0
+anthropic>=0.18.0  # Claude 支持（可选）
+
+# 微信自动化（仅限Windows平台）
+# Plus版优先 - 一步到位集成
+wxautox>=4.0.0; platform_system == "Windows"  # ✅ Plus版 (主要)
+wxauto>=3.9.0; platform_system == "Windows"   # 开源版 (备选)
+
+# OCR和文档处理 - PaddleOCR-VL多模态版本（推荐）
+paddleocr>=3.0.0                    # ✅ 核心OCR引擎
+paddlepaddle>=2.6.0                 # PaddlePaddle深度学习框架
+paddleocr[vl]>=3.0.0                # ✅ PaddleOCR-VL多模态（主要）
+paddleocr[structure]>=3.0.0         # ✅ 版面分析PP-StructureV3（备选）
+paddleocr[chat]>=3.0.0              # ✅ 文档理解PP-ChatOCRv4（备选）
+
+# 测试框架
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# 代码质量
+black>=23.0.0
+flake8>=6.0.0
+isort>=5.12.0
+
+# Web API
+fastapi>=0.111.0
+uvicorn>=0.30.0
+PyJWT>=2.8.0
+
+# ============================================
+# 可选依赖（按需安装）
+# ============================================
+
+# 企业级知识库（向量检索）
+supabase>=2.0.0              # ✅ Supabase客户端
+pinecone-client>=3.0.0      # ✅ Pinecone向量数据库
+psycopg2-binary>=2.9.0      # ✅ PostgreSQL适配器（Supabase使用）
+
+# 智能嵌入服务（基于您的分析）
+openai>=1.0.0                # ✅ OpenAI嵌入API + DeepSeek兼容
+dashscope>=1.0.0             # ✅ 通义千问嵌入API
+requests>=2.31.0             # ✅ 智谱AI API调用
+
+# 文档解析
+# pymupdf>=1.23.0           # PDF解析
+# python-docx>=0.8.11       # DOC/DOCX解析
+# paddleocr>=2.7.0          # OCR（中文识别）
+# paddlepaddle>=2.5.0       # PaddleOCR依赖
+
+# 高级RAG
+# rank-bm25>=0.2.2          # BM25算法
+# langchain>=0.1.0          # 文档分段工具
+
+# 企业微信（官方API，防封号）
+# wechatpy>=1.8.0           # 企业微信SDK
+
+# 大模型（Claude支持）
+# anthropic>=0.18.0         # 已在上面列出
+
+# ============================================
+# 安装建议
+# ============================================
+# 
+# Plus版安装（推荐，一步到位）：
+#   pip install wxautox
+#   wxautox -a [激活码]
+#   购买地址: https://docs.wxauto.org/plus.html
+#
+# 基础安装（开源版，备选）：
+#   pip install wxauto
+#
+# 版本说明：
+#   - Plus版: 高性能、更多功能、专属支持
+#   - 开源版: 基础功能、免费使用
+#   - 系统默认使用Plus版，不可用时自动降级
+#
+# 企业级知识库（推荐）：
+#   pip install chromadb FlagEmbedding paddleocr pymupdf python-docx
+#
+# 企业微信（防封号）：
+#   pip install wechatpy
+#
+# 完整安装（全部功能）：
+#   pip install -r requirements.txt
+#   pip install chromadb FlagEmbedding paddleocr pymupdf python-docx wechatpy
+

@@ -4,3 +4,15 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 INFO:     127.0.0.1:65026 - "GET /api/v1/health HTTP/1.1" 404 Not Found
 INFO:     127.0.0.1:65090 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58674 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58674 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64371 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64371 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64866 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49572 - "GET /api/v1/health HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49629 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49638 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49949 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50096 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50109 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54653 - "GET / HTTP/1.1" 404 Not Found

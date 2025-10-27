@@ -1,0 +1,110 @@
+# ============================================
+# 微信客服中台环境配置
+# ============================================
+
+# ==================== 数据库配置 ====================
+# Supabase 云数据库（必需）
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+
+# ==================== 向量数据库配置 ====================
+# Pinecone 向量数据库（必需）
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_ENVIRONMENT=us-west1-gcp-free
+PINECONE_INDEX_NAME=wxauto-messages
+
+# ==================== AI模型配置 ====================
+# OpenAI
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_API_BASE=https://api.openai.com/v1
+OPENAI_MODEL=gpt-3.5-turbo
+
+# DeepSeek
+DEEPSEEK_API_KEY=sk-your-deepseek-api-key-here
+DEEPSEEK_API_BASE=https://api.deepseek.com/v1
+DEEPSEEK_MODEL=deepseek-chat
+
+# Qwen (通义千问)
+QWEN_API_KEY=sk-your-qwen-api-key-here
+QWEN_API_BASE=https://dashscope.aliyuncs.com/compatible-mode/v1
+QWEN_MODEL=qwen-turbo
+
+# GLM (智谱AI)
+GLM_API_KEY=your-glm-api-key-here
+GLM_API_BASE=https://open.bigmodel.cn/api/paas/v4
+GLM_MODEL=glm-4
+
+# ==================== 嵌入模型配置 ====================
+# OpenAI 嵌入模型
+OPENAI_EMBEDDING_MODEL=text-embedding-3-large
+OPENAI_EMBEDDING_DIMENSION=3072
+
+# ZhipuAI 嵌入模型
+ZHIPUAI_API_KEY=your-zhipuai-api-key-here
+ZHIPUAI_EMBEDDING_MODEL=text2vec-large-chinese
+ZHIPUAI_EMBEDDING_DIMENSION=1024
+
+# Qwen 嵌入模型
+QWEN_EMBEDDING_MODEL=text-embedding-v2
+QWEN_EMBEDDING_DIMENSION=1536
+
+# DeepSeek 嵌入模型
+DEEPSEEK_EMBEDDING_MODEL=text-embedding
+DEEPSEEK_EMBEDDING_DIMENSION=1024
+
+# ==================== 微信配置 ====================
+# 微信白名单群聊（JSON格式）
+WECHAT_WHITELISTED_GROUPS=["技术支持群","VIP客户群","测试群"]
+
+# 微信检查间隔（秒）
+WECHAT_CHECK_INTERVAL=1
+
+# 微信Plus模式
+WECHAT_PLUS_MODE=true
+
+# ==================== 系统配置 ====================
+# 应用名称
+APP_NAME=微信客服中台
+
+# 应用版本
+APP_VERSION=2.0.0
+
+# 调试模式
+DEBUG_MODE=false
+
+# 日志级别
+LOG_LEVEL=INFO
+
+# ==================== 监控配置 ====================
+# 启用监控
+ENABLE_MONITORING=true
+
+# 监控间隔（秒）
+MONITOR_INTERVAL=30
+
+# 告警邮箱
+ALERT_EMAIL=admin@example.com
+
+# ==================== 安全配置 ====================
+# 启用加密
+ENABLE_ENCRYPTION=true
+
+# 会话超时（分钟）
+SESSION_TIMEOUT=60
+
+# 最大登录尝试次数
+MAX_LOGIN_ATTEMPTS=5
+
+# ==================== 配置管理 ====================
+# 配置加密密钥（自动生成）
+CONFIG_ENCRYPTION_KEY=your_config_encryption_key_here
+
+# Redis连接（可选）
+REDIS_URL=redis://localhost:6379
+
+# ==================== 使用说明 ====================
+# 1. 复制此文件为 .env
+# 2. 填写您的实际配置值
+# 3. 运行: python client/cloud_client.py --setup
+# 4. 或通过Web界面配置: http://localhost:8000/config

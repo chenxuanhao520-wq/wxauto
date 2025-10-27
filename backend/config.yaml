@@ -1,0 +1,286 @@
+# 环境配置：dev | prod
+env: dev
+
+# ==================== 数据库配置 ====================
+database:
+  type: supabase  # 仅支持Supabase
+  
+  # Supabase配置
+  supabase:
+    url: ""  # 从环境变量SUPABASE_URL读取
+    anon_key: ""  # 从环境变量SUPABASE_ANON_KEY读取
+    service_role_key: ""  # 从环境变量SUPABASE_SERVICE_ROLE_KEY读取
+
+# ==================== 向量数据库配置 ====================
+vector:
+  type: pinecone  # 仅支持Pinecone
+  
+  # Pinecone配置
+  pinecone:
+    api_key: ""  # 从环境变量PINECONE_API_KEY读取
+    environment: "us-west1-gcp-free"  # 从环境变量PINECONE_ENVIRONMENT读取
+    index_name: "wxauto-knowledge"  # 从环境变量PINECONE_INDEX_NAME读取
+
+# ==================== AI配置 ====================
+ai:
+  # 智能路由配置
+  smart_routing:
+    enabled: true                    # 是否启用智能路由
+    strategy: "quality_first"        # ✅ 优化：质量优先（Qwen 速度快+质量高）
+  
+  # 主提供商配置
+  primary:
+    provider: "qwen"                 # ✅ 主提供商：Qwen-Turbo（速度快31.8%，质量4.5/5）
+    model: "qwen-turbo"              # 快速+高质量+免费额度
+  
+  # 备用提供商配置
+  fallback:
+    provider: "glm"                  # ✅ 优化：GLM 兜底（完全免费，稳定可靠）
+    model: "glm-4-flash"             # 免费+精简+可靠
+    enabled: true                    # 是否启用备用
+
+# 原有AI配置（保持兼容）
+ai_legacy:
+  primary: gpt-4o-mini
+  fallback: deepseek-chat
+  timeout_ms: 6000
+  max_tokens: 512
+  temperature: 0.3
+  stream: true
+  system_prompt: |
+    你是一位专业的技术客服，负责解答产品相关问题。
+    - 回答简洁准确，≤400字
+    - 使用①②③分步骤说明
+    - 引用证据时标注文档名和版本
+    - 不确定时主动澄清，不可编造信息
+
+# 嵌入模型配置
+embedding:
+  model: bge-m3
+  batch_size: 32
+
+# RAG 配置
+rag:
+  bm25_topn: 50
+  top_k: 4
+  min_confidence: 0.75
+  medium_confidence: 0.55
+  rerank_model: bge-reranker-base
+
+# OCR 配置
+ocr:
+  provider_order:
+    - paddle_local
+    - cloud_ocr
+  timeout_ms: 3000
+
+# ASR 配置
+asr:
+  provider_order:
+    - wechat_builtin
+    - cloud_asr
+  timeout_ms: 5000
+
+# 速率限制
+rate_limit:
+  per_group_per_minute: 20
+  per_user_per_30s: 1
+  global_per_minute: 100
+
+# ========================================
+# ERP集成配置（智邦国际ERP自动同步）
+# ========================================
+erp_integration:
+  enabled: false                         # 是否启用ERP集成（首次使用请先配置后再启用）
+  base_url: "http://ls1.jmt.ink:46088"   # ERP服务器地址
+  
+  # ERP登录认证
+  auth:
+    username: ""                         # ⚠️ 请填写ERP用户名
+    password: ""                         # ⚠️ 请填写ERP密码
+    auto_login: true
+  
+  # ERP数据拉取配置
+  erp_pull:
+    enabled: true
+    interval: 3600                       # 每小时拉取一次（秒）
+    batch_size: 100
+    incremental: true                    # 增量同步
+  
+  # ERP数据推送配置
+  erp_push:
+    enabled: true
+    interval: 1800                       # 每30分钟推送一次（秒）
+    batch_size: 50
+    auto_sync: true                      # 自动同步（不需要人工审批）
+  
+  # 同步规则配置
+  rules:
+    # 强制同步规则（已下单/签合同/付款）
+    mandatory_sync:
+      enabled: true
+    
+    # 高质量自动同步（质量分≥80）
+    high_quality_sync:
+      enabled: true
+      min_quality_score: 80
+      required_fields:
+        - phone_verified
+        - company_name
+      min_intent_score: 80
+    
+    # 中等质量条件同步
+    medium_quality_sync:
+      enabled: true
+      combinations:
+        - [phone, quote_request]
+        - [company_name, business_license]
+        - [conversation_days>=7, message_count>=50]
+    
+    # 低质量跳过
+    low_quality_skip:
+      enabled: true
+      skip_conditions:
+        - no_basic_info
+        - intent_score<30
+        - message_count<5
+        - marked_as_invalid
+  
+  # 冲突处理策略
+  conflict_resolution:
+    strategy: 'priority_based'           # priority_based/timestamp/manual
+    core_fields:                         # 核心字段以ERP为准
+      - phone
+      - company_name
+      - erp_customer_code
+    local_priority_fields:               # 本地优先字段
+      - wechat_id
+      - wechat_nickname
+      - intent_score
+  
+  # 数据质量控制
+  data_quality:
+    min_score_for_sync: 60               # 最低质量分数（0-100）
+    verify_before_sync: true             # 同步前验证
+    auto_fix_format: true                # 自动修正格式
+  
+  # 其他选项
+  run_on_start: false                    # 启动时立即执行一次同步
+  
+  # 日志配置
+  logging:
+    level: "INFO"                        # DEBUG/INFO/WARNING/ERROR
+    file: "logs/erp_sync.log"
+
+# ACK 配置
+ack:
+  enabled: true
+  timeout_ms: 3000
+  message: "收到，处理中……"
+
+# 会话配置
+session:
+  ttl_minutes: 15
+  summary_max_length: 200
+  max_history_turns: 5
+
+# 响应配置
+response:
+  max_length: 400
+  split_threshold: 500
+  target_p95_ms: 10000
+
+# Token 预算
+budget:
+  avg_tokens_per_request: 1200
+  max_response_tokens: 400
+  max_evidence_tokens: 600
+
+# 置信度分流阈值
+confidence:
+  direct_answer: 0.75
+  clarification: 0.55
+  handoff: 0.55
+
+# 安全禁答域（关键词匹配）
+forbidden_topics:
+  - 价格
+  - 报价
+  - 合同
+  - 交付时间
+  - 法律
+  - 隐私
+  - 个人信息
+
+# 管理员配置
+admin:
+  names:
+    - 管理员
+    - 系统管理员
+  commands:
+    mute: "#mute"
+    unmute: "#unmute"
+    status: "#status"
+    debug_on: "#debug on"
+    debug_off: "#debug off"
+    add_kb: "#kb"
+    bind_customer: "#bind"
+
+# 日志配置
+logging:
+  level: INFO
+  format: json
+  file: logs/app.log
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# 数据库配置
+database:
+  path: data/data.db
+  backup_enabled: true
+  backup_interval_hours: 24
+
+# 密钥配置（仅从环境变量读取）
+secrets:
+  use_env: true
+  # 需要设置的环境变量：
+  # - OPENAI_API_KEY
+  # - DEEPSEEK_API_KEY
+  # - CLOUD_OCR_KEY（可选）
+  # - CLOUD_ASR_KEY（可选）
+
+# 微信配置
+wechat:
+  whitelisted_groups:
+    - 技术支持群
+    - VIP客户群
+    - 测试群                           # ✅ 添加测试群，方便开发调试
+  check_interval_ms: 500
+  max_retries: 3
+
+# 健康检查
+health:
+  enabled: true
+  test_group: 测试群
+  interval_minutes: 30
+  shadow_message: "[健康探针]"
+
+# 环境特定配置覆盖
+profiles:
+  dev:
+    llm:
+      max_tokens: 256
+      temperature: 0.2
+    logging:
+      level: DEBUG
+    rate_limit:
+      per_group_per_minute: 50
+  
+  prod:
+    llm:
+      max_tokens: 512
+      temperature: 0.3
+    logging:
+      level: INFO
+    database:
+      backup_enabled: true
