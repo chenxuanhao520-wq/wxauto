@@ -78,7 +78,7 @@ mcp_platform:
     # Sequential Thinking 结构化思考服务
     sequential_thinking:
       provider: "aliyun_bailian"
-      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/sequential-thinking/sse"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/Sequential_Thinking/sse"
       api_key: "${QWEN_API_KEY}"
       enabled: true
       timeout: 60
@@ -111,6 +111,58 @@ mcp_platform:
           - 创意头脑风暴
           - 逻辑推理
           - 风险评估
+    
+    # WebSearch 网页搜索服务
+    websearch:
+      provider: "aliyun_bailian"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/sse"
+      api_key: "${QWEN_API_KEY}"
+      enabled: true
+      timeout: 60
+      max_retries: 3
+      
+      # 缓存配置
+      cache:
+        enabled: true
+        ttl: 1800              # 缓存有效期：30分钟
+        max_size: 500          # 最大缓存条目数
+      
+      # 元数据
+      metadata:
+        description: "WebSearch 网页搜索服务"
+        tools:
+          - web_search
+          - search_query
+        capabilities:
+          - 实时网页搜索
+          - 搜索结果聚合
+          - 信息提取
+    
+    # WebParser 网页解析服务
+    webparser:
+      provider: "aliyun_bailian"
+      endpoint: "https://dashscope.aliyuncs.com/api/v1/mcps/WebParser/sse"
+      api_key: "${QWEN_API_KEY}"
+      enabled: true
+      timeout: 60
+      max_retries: 3
+      
+      # 缓存配置
+      cache:
+        enabled: true
+        ttl: 3600              # 缓存有效期：1小时
+        max_size: 500          # 最大缓存条目数
+      
+      # 元数据
+      metadata:
+        description: "WebParser 网页解析服务"
+        tools:
+          - parse_webpage
+          - extract_content
+        capabilities:
+          - 网页内容解析
+          - 结构化数据提取
+          - 智能摘要
     
     # 智邦国际 ERP 服务
     erp_zhibang:
@@ -154,6 +206,33 @@ mcp_platform:
           - 订单管理（创建、查询）
           - 产品查询
           - 批量数据同步
+    
+    # Framelink Figma 设计服务
+    figma:
+      provider: "framelink_figma"
+      type: "local"            # 本地实现，通过 npx 调用
+      api_key: "${FIGMA_API_KEY}"
+      enabled: true
+      timeout: 60
+      max_retries: 3
+      
+      # 缓存配置
+      cache:
+        enabled: true
+        ttl: 7200              # 缓存有效期：2小时（设计稿更新频率较低）
+        max_size: 200          # 最大缓存条目数
+      
+      # 元数据
+      metadata:
+        description: "Framelink Figma 设计文件集成服务"
+        tools:
+          - get_figma_data
+          - download_figma_images
+        capabilities:
+          - 获取 Figma 设计文件数据（布局、内容、视觉、组件）
+          - 下载 SVG 和 PNG 图片资源
+          - 支持节点树遍历和深度控制
+          - 支持图片裁剪和尺寸配置
   
   # ==================== 缓存配置 ====================
   cache:

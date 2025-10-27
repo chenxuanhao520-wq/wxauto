@@ -13,13 +13,15 @@ database:
 
 # ==================== 向量数据库配置 ====================
 vector:
-  type: pinecone  # 仅支持Pinecone
+  type: supabase_pgvector  # 使用Supabase内置pgvector
   
-  # Pinecone配置
-  pinecone:
-    api_key: ""  # 从环境变量PINECONE_API_KEY读取
-    environment: "us-west1-gcp-free"  # 从环境变量PINECONE_ENVIRONMENT读取
-    index_name: "wxauto-knowledge"  # 从环境变量PINECONE_INDEX_NAME读取
+  # Supabase pgvector配置
+  supabase_pgvector:
+    table_name: "knowledge_vectors"  # 向量表名
+    embedding_dimension: 1536  # OpenAI embedding维度
+    similarity_threshold: 0.7  # 相似度阈值
+    index_type: "ivfflat"  # 索引类型：ivfflat, hnsw
+    distance_metric: "cosine"  # 距离度量：cosine, l2, inner_product
 
 # ==================== AI配置 ====================
 ai:

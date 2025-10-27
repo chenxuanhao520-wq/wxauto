@@ -20,6 +20,14 @@ from .providers import (
 )
 from .base import BaseLLMProvider
 
+# 导入深度思考客户端
+try:
+    from ..mcp_platform.qwen_thinking_client import QwenThinkingClient
+    THINKING_CLIENT_AVAILABLE = True
+except ImportError:
+    THINKING_CLIENT_AVAILABLE = False
+    QwenThinkingClient = None
+
 logger = logging.getLogger(__name__)
 
 # 尝试导入智能路由器
@@ -64,6 +72,19 @@ class AIGateway:
         """
         self.enable_fallback = enable_fallback
         self.enable_smart_routing = enable_smart_routing
+        
+        # 初始化深度思考客户端
+        self.thinking_client = None
+        if THINKING_CLIENT_AVAILABLE:
+            qwen_api_key = os.getenv('QWEN_API_KEY')
+            if qwen_api_key:
+                try:
+                    self.thinking_client = QwenThinkingClient(qwen_api_key)
+                    logger.info("✅ 深度思考客户端已启用")
+                except Exception as e:
+                    logger.warning(f"⚠️ 深度思考客户端初始化失败: {e}")
+            else:
+                logger.warning("⚠️ QWEN_API_KEY 未配置，深度思考功能不可用")
         
         # 初始化智能路由器
         if enable_smart_routing and SMART_ROUTER_AVAILABLE:
@@ -401,4 +422,115 @@ class AIGateway:
             "smart_routing_enabled": True,
             "router_stats": self.router.get_model_stats()
         }
+    
+    async def deep_thinking(
+        self,
+        problem: str,
+        context: Optional[str] = None,
+        max_steps: int = 5,
+        thinking_style: str = "analytical"
+    ) -> Dict[str, Any]:
+        """
+        深度思考 - 结构化问题分析
+        
+        Args:
+            problem: 要分析的问题
+            context: 上下文信息
+            max_steps: 最大思考步骤数
+            thinking_style: 思考风格 (analytical, creative, logical, practical)
+            
+        Returns:
+            思考结果字典
+        """
+        if not self.thinking_client:
+            return {
+                "success": False,
+                "error": "深度思考客户端不可用，请配置 QWEN_API_KEY"
+            }
+        
+        try:
+            result = await self.thinking_client.sequential_thinking(
+                problem=problem,
+                context=context,
+                max_steps=max_steps,
+                thinking_style=thinking_style
+            )
+            return result
+        except Exception as e:
+            logger.error(f"深度思考失败: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    async def decision_analysis(
+        self,
+        decision_context: str,
+        options: List[str],
+        criteria: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
+        """
+        决策分析
+        
+        Args:
+            decision_context: 决策背景
+            options: 可选方案列表
+            criteria: 评估标准列表
+            
+        Returns:
+            决策分析结果
+        """
+        if not self.thinking_client:
+            return {
+                "success": False,
+                "error": "深度思考客户端不可用"
+            }
+        
+        try:
+            result = await self.thinking_client.decision_analysis(
+                decision_context=decision_context,
+                options=options,
+                criteria=criteria
+            )
+            return result
+        except Exception as e:
+            logger.error(f"决策分析失败: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
+    
+    async def problem_decomposition(
+        self,
+        complex_problem: str,
+        decomposition_level: int = 3
+    ) -> Dict[str, Any]:
+        """
+        问题分解
+        
+        Args:
+            complex_problem: 复杂问题
+            decomposition_level: 分解层级
+            
+        Returns:
+            分解结果
+        """
+        if not self.thinking_client:
+            return {
+                "success": False,
+                "error": "深度思考客户端不可用"
+            }
+        
+        try:
+            result = await self.thinking_client.problem_decomposition(
+                complex_problem=complex_problem,
+                decomposition_level=decomposition_level
+            )
+            return result
+        except Exception as e:
+            logger.error(f"问题分解失败: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }
 

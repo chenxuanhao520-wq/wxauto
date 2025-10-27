@@ -97,7 +97,7 @@ class HealthService:
         try:
             dependencies = {
                 "supabase": await self._check_supabase(),
-                "pinecone": await self._check_pinecone(),
+                "vector_db": await self._check_vector_db(),
                 "ai_services": await self._check_ai_services(),
                 "database": await self._check_database()
             }
@@ -139,20 +139,63 @@ class HealthService:
                 "response_time_ms": None
             }
     
-    async def _check_pinecone(self) -> Dict[str, Any]:
-        """检查Pinecone连接"""
+    async def _check_vector_db(self) -> Dict[str, Any]:
+        """检查向量数据库连接"""
         try:
-            # 这里应该实际检查Pinecone连接
-            # 暂时返回模拟状态
-            return {
-                "status": "healthy",
-                "message": "Pinecone连接正常",
-                "response_time_ms": 120
-            }
+            from modules.vector.supabase_vector_client import SupabaseVectorClient
+            from modules.storage.supabase_client import get_supabase_client
+            
+            supabase = get_supabase_client()
+            if not supabase:
+                return {
+                    "status": "error",
+                    "message": "Supabase客户端未初始化",
+                    "response_time_ms": None
+                }
+            
+    async def _check_vector_db(self) -> Dict[str, Any]:
+        """检查向量数据库连接"""
+        try:
+            from modules.vector.supabase_vector import get_vector_search_service
+            from modules.storage.supabase_client import get_supabase_client
+            
+            supabase = get_supabase_client()
+            if not supabase:
+                return {
+                    "status": "error",
+                    "message": "Supabase客户端未初始化",
+                    "response_time_ms": None
+                }
+            
+            # 测试向量搜索服务
+            try:
+                vector_service = get_vector_search_service()
+                health_status = await vector_service.health_check()
+                
+                if health_status:
+                    return {
+                        "status": "healthy",
+                        "message": "向量数据库连接正常",
+                        "response_time_ms": None,
+                        "backend": "supabase_pgvector"
+                    }
+                else:
+                    return {
+                        "status": "error",
+                        "message": "向量数据库健康检查失败",
+                        "response_time_ms": None
+                    }
+            except RuntimeError:
+                return {
+                    "status": "error",
+                    "message": "向量搜索服务未初始化",
+                    "response_time_ms": None
+                }
+                
         except Exception as e:
             return {
                 "status": "error",
-                "message": f"Pinecone连接失败: {e}",
+                "message": f"向量数据库连接失败: {e}",
                 "response_time_ms": None
             }
     

@@ -116,6 +116,9 @@ class MCPManagerV2:
             elif name == "erp_zhibang":
                 from .providers.zhibang_erp_provider import ZhibangERPProvider
                 self.clients[name] = ZhibangERPProvider(service, self.cache_manager)
+            elif name == "figma":
+                from .providers.figma_provider import FigmaProvider
+                self.clients[name] = FigmaProvider(service, self.cache_manager)
             else:
                 from .mcp_client import MCPClient
                 self.clients[name] = MCPClient(service, self.cache_manager)

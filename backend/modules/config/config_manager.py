@@ -38,10 +38,13 @@ class ConfigManager:
                     "anon_key": os.getenv("SUPABASE_ANON_KEY", ""),
                     "service_role_key": os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
                 },
-                "pinecone_settings": {
-                    "api_key": os.getenv("PINECONE_API_KEY", ""),
-                    "environment": os.getenv("PINECONE_ENVIRONMENT", "us-west1-gcp-free"),
-                    "index_name": os.getenv("PINECONE_INDEX_NAME", "wxauto-knowledge")
+                "vector_settings": {
+                    "type": "supabase_pgvector",
+                    "table_name": os.getenv("VECTOR_TABLE_NAME", "knowledge_vectors"),
+                    "dimension": int(os.getenv("VECTOR_DIMENSION", "1536")),
+                    "distance_metric": os.getenv("VECTOR_DISTANCE_METRIC", "cosine"),
+                    "similarity_threshold": float(os.getenv("VECTOR_SIMILARITY_THRESHOLD", "0.7")),
+                    "index_type": os.getenv("VECTOR_INDEX_TYPE", "ivfflat")
                 },
                 "ai_settings": {
                     "primary_provider": os.getenv("AI_PRIMARY_PROVIDER", "qwen"),
@@ -179,7 +182,7 @@ class ConfigManager:
         descriptions = {
             "system_settings": "系统基本设置",
             "supabase_settings": "Supabase数据库配置",
-            "pinecone_settings": "Pinecone向量数据库配置",
+            "vector_settings": "Supabase pgvector向量数据库配置",
             "ai_settings": "AI模型配置",
             "wechat_settings": "微信配置",
             "monitoring_settings": "监控配置"
@@ -190,7 +193,7 @@ class ConfigManager:
         """判断是否为敏感配置"""
         sensitive_keys = [
             "supabase_settings",
-            "pinecone_settings",
+            "vector_settings",
             "ai_settings"
         ]
         return key in sensitive_keys

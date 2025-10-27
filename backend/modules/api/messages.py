@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Request
 from pydantic import BaseModel, Field
 
 from modules.storage.unified_database import UnifiedDatabaseManager, get_database_manager as get_database_manager_dep
-from modules.vector.pinecone_client import VectorSearchService, get_vector_search_service as get_vector_search_service_dep
+from modules.vector.supabase_vector import VectorSearchService, get_vector_search_service as get_vector_search_service_dep
 from modules.embeddings.unified_embedding_service import SmartEmbeddingService, get_embedding_service as get_embedding_service_dep
 from modules.auth.supabase_auth import SupabaseAuth, get_auth as get_auth_dep
 

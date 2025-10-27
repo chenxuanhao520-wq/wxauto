@@ -37,8 +37,7 @@ PyJWT>=2.8.0
 # ============================================
 
 # 企业级知识库（向量检索）
-supabase>=2.0.0              # ✅ Supabase客户端
-pinecone-client>=3.0.0      # ✅ Pinecone向量数据库
+supabase>=2.0.0              # ✅ Supabase客户端（数据库 + 向量数据库）
 psycopg2-binary>=2.9.0      # ✅ PostgreSQL适配器（Supabase使用）
 
 # 智能嵌入服务（基于您的分析）

@@ -35,10 +35,13 @@ class MCPClient:
             响应结果
         """
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "Accept": "text/event-stream"
         }
+        
+        # 只有当 API Key 存在且非空时才添加 Authorization 头
+        if self.api_key and self.api_key.strip():
+            headers["Authorization"] = f"Bearer {self.api_key.strip()}"
         
         payload = {
             "jsonrpc": "2.0",
@@ -52,6 +55,7 @@ class MCPClient:
         for attempt in range(self.max_retries):
             try:
                 async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    # 使用 stream 方法处理 SSE 响应
                     async with client.stream(
                         'POST',
                         self.endpoint,
@@ -60,30 +64,46 @@ class MCPClient:
                     ) as response:
                         
                         if response.status_code != 200:
-                            raise Exception(f"HTTP {response.status_code}: {response.text}")
+                            error_text = await response.aread()
+                            raise Exception(f"HTTP {response.status_code}: {error_text.decode('utf-8')}")
                         
                         # 处理 SSE 流
                         result_data = None
-                        async for line in response.aiter_lines():
-                            if line.startswith('data:'):
-                                data_json = line[5:].strip()
-                                if data_json and data_json != '[DONE]':
-                                    try:
-                                        data = json.loads(data_json)
-                                        result_data = data
-                                        
-                                        # 如果是错误响应
-                                        if "error" in data:
-                                            raise Exception(f"MCP 错误: {data['error']}")
-                                        
-                                        # 如果是结果响应，直接返回
-                                        if "result" in data:
-                                            return data["result"]
-                                            
-                                    except json.JSONDecodeError:
-                                        logger.debug(f"跳过非 JSON 数据: {data_json[:50]}...")
-                                        continue
+                        buffer = ""
                         
+                        async for chunk in response.aiter_text():
+                            buffer += chunk
+                            
+                            # 按行分割处理
+                            while '\n' in buffer:
+                                line, buffer = buffer.split('\n', 1)
+                                line = line.strip()
+                                
+                                if not line:
+                                    continue
+                                
+                                # 处理 SSE 数据行
+                                if line.startswith('data:'):
+                                    data_json = line[5:].strip()
+                                    
+                                    if data_json and data_json != '[DONE]':
+                                        try:
+                                            data = json.loads(data_json)
+                                            result_data = data
+                                            
+                                            # 如果是错误响应
+                                            if "error" in data:
+                                                raise Exception(f"MCP 错误: {data['error']}")
+                                            
+                                            # 如果是结果响应，直接返回
+                                            if "result" in data:
+                                                return data["result"]
+                                                
+                                        except json.JSONDecodeError:
+                                            logger.debug(f"跳过非 JSON 数据: {data_json[:50]}...")
+                                            continue
+                        
+                        # 如果流结束但有数据，返回最后的数据
                         if result_data:
                             return result_data
                         else:

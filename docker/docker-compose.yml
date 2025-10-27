@@ -12,12 +12,18 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - PINECONE_API_KEY=${PINECONE_API_KEY}
-      - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT:-us-west1-gcp-free}
-      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME:-wxauto-knowledge}
+      # 向量数据库配置（使用Supabase pgvector）
+      - VECTOR_TYPE=supabase_pgvector
+      - VECTOR_TABLE_NAME=${VECTOR_TABLE_NAME:-knowledge_vectors}
+      - VECTOR_DIMENSION=${VECTOR_DIMENSION:-1536}
+      - VECTOR_DISTANCE_METRIC=${VECTOR_DISTANCE_METRIC:-cosine}
+      - VECTOR_SIMILARITY_THRESHOLD=${VECTOR_SIMILARITY_THRESHOLD:-0.7}
+      - VECTOR_INDEX_TYPE=${VECTOR_INDEX_TYPE:-ivfflat}
+      # AI模型配置
       - QWEN_API_KEY=${QWEN_API_KEY}
       - GLM_API_KEY=${GLM_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
     volumes:
       - ../backend/logs:/app/logs
     restart: unless-stopped

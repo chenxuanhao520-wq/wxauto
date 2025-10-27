@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Wxauto 智能客服中台 - 统一API服务入口
-云原生架构：Supabase + Pinecone + AI Gateway
+云原生架构：Supabase + pgvector + AI Gateway
 """
 
 import os
@@ -11,6 +11,10 @@ import asyncio
 from pathlib import Path
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 # FastAPI 相关
 from fastapi import FastAPI, HTTPException, Depends, Request, BackgroundTasks
@@ -26,7 +30,7 @@ sys.path.insert(0, str(project_root))
 
 # 导入核心模块
 from modules.storage.unified_database import init_database_manager, get_database_manager
-from modules.vector.pinecone_client import init_vector_search_service, get_vector_search_service
+from modules.vector.supabase_vector import init_vector_search_service, get_vector_search_service
 from modules.embeddings.unified_embedding_service import init_embedding_service, get_embedding_service
 from modules.config.config_manager import init_config_manager, get_config_manager
 from modules.auth.supabase_auth import init_auth, get_auth
@@ -37,6 +41,7 @@ from modules.api.messages import router as messages_router
 from modules.api.config import router as config_router
 from modules.api.health import router as health_router
 from modules.api.tenants import router as tenants_router
+from modules.api.mcp_bridge import router as mcp_router
 
 # 配置日志
 logging.basicConfig(
@@ -93,12 +98,12 @@ async def lifespan(app: FastAPI):
         init_auth(app_state["supabase_client"].client)
         app_state["auth_service"] = get_auth()
         
-        # 5. 初始化向量搜索服务
-        logger.info("🔍 初始化向量搜索服务...")
+        # 5. 初始化向量搜索服务（使用 Supabase pgvector）
+        logger.info("🔍 初始化向量搜索服务（Supabase pgvector）...")
         try:
-            init_vector_search_service()
+            init_vector_search_service(app_state["supabase_client"])
             app_state["vector_search_service"] = get_vector_search_service()
-            logger.info("✅ 向量搜索服务初始化成功")
+            logger.info("✅ 向量搜索服务初始化成功（Supabase pgvector）")
         except Exception as e:
             logger.warning(f"⚠️ 向量搜索服务初始化失败: {e}")
             logger.info("💡 向量搜索功能将不可用")
@@ -138,7 +143,7 @@ async def lifespan(app: FastAPI):
 # 创建 FastAPI 应用
 app = FastAPI(
     title="Wxauto 智能客服中台 API",
-    description="基于 Supabase + Pinecone + AI Gateway 的云原生智能客服系统",
+    description="基于 Supabase + pgvector + AI Gateway 的云原生智能客服系统",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -220,6 +225,12 @@ app.include_router(
     dependencies=[Depends(get_database_manager_dep)]
 )
 
+app.include_router(
+    mcp_router,
+    prefix="/api/v1/mcp",
+    tags=["MCP 浏览器桥接"]
+)
+
 
 # 静态文件服务
 if Path("web/static").exists():
@@ -245,7 +256,7 @@ async def root():
             <body>
                 <h1>🚀 Wxauto 智能客服中台</h1>
                 <p>版本: 2.0.0</p>
-                <p>架构: 云原生 (Supabase + Pinecone + AI Gateway)</p>
+                <p>架构: 云原生 (Supabase + pgvector + AI Gateway)</p>
                 <ul>
                     <li><a href="/docs">API 文档</a></li>
                     <li><a href="/redoc">ReDoc 文档</a></li>
@@ -306,7 +317,7 @@ def custom_openapi():
         
         基于云原生架构的智能客服系统，集成：
         - **Supabase**: 数据库和实时同步
-        - **Pinecone**: 向量搜索和RAG
+        - **pgvector**: 向量搜索和RAG
         - **AI Gateway**: 多模型智能路由
         - **配置管理**: 统一配置和实时同步
         

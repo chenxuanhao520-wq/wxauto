@@ -32,8 +32,8 @@ class ConfigValidator:
         try:
             if config_type == "supabase":
                 return await self._test_supabase_config(config_data)
-            elif config_type == "pinecone":
-                return await self._test_pinecone_config(config_data)
+            elif config_type == "vector":
+                return await self._test_vector_config(config_data)
             elif config_type == "ai":
                 return await self._test_ai_config(config_data)
             elif config_type == "wechat":
@@ -82,48 +82,40 @@ class ConfigValidator:
             logger.error(f"❌ Supabase配置测试失败: {e}")
             return False, f"Supabase连接测试失败: {e}", None
     
-    async def _test_pinecone_config(self, config_data: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
-        """测试Pinecone配置"""
+    async def _test_vector_config(self, config_data: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
+        """测试Supabase pgvector配置"""
         try:
-            api_key = config_data.get("api_key", "")
-            environment = config_data.get("environment", "us-west1-gcp-free")
-            index_name = config_data.get("index_name", "wxauto-knowledge")
+            vector_type = config_data.get("type", "")
+            table_name = config_data.get("table_name", "")
             
-            if not api_key:
-                return False, "Pinecone API密钥不能为空", None
+            if vector_type != "supabase_pgvector":
+                return False, "仅支持Supabase pgvector", None
             
-            # 测试连接
+            if not table_name:
+                return False, "向量表名不能为空", None
+            
+            # 测试Supabase连接（向量数据库使用相同的Supabase连接）
             try:
-                from pinecone import Pinecone
+                from modules.storage.supabase_client import get_supabase_client
                 
-                pc = Pinecone(api_key=api_key)
+                supabase = get_supabase_client()
+                if not supabase:
+                    return False, "Supabase客户端未初始化", None
                 
-                # 获取索引列表
-                indexes = pc.list_indexes()
-                if hasattr(indexes, 'names'):
-                    index_names = indexes.names()
-                else:
-                    index_names = [idx.name for idx in indexes]
+                # 测试向量表是否存在
+                result = supabase.table(table_name).select("id").limit(1).execute()
                 
-                if index_name in index_names:
-                    return True, "Pinecone连接测试成功", {
-                        "environment": environment,
-                        "index_name": index_name,
-                        "total_indexes": len(index_names)
-                    }
-                else:
-                    return False, f"Pinecone索引不存在: {index_name}", {
-                        "environment": environment,
-                        "index_name": index_name,
-                        "available_indexes": index_names
-                    }
-                    
-            except ImportError:
-                return False, "Pinecone库未安装: pip install pinecone-client", None
+                return True, "Supabase pgvector配置测试成功", {
+                    "table_name": table_name,
+                    "type": vector_type
+                }
+                
+            except Exception as e:
+                return False, f"Supabase pgvector连接测试失败: {e}", None
                 
         except Exception as e:
-            logger.error(f"❌ Pinecone配置测试失败: {e}")
-            return False, f"Pinecone连接测试失败: {e}", None
+            logger.error(f"❌ 向量数据库配置测试失败: {e}")
+            return False, f"向量数据库连接测试失败: {e}", None
     
     async def _test_ai_config(self, config_data: Dict[str, Any]) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """测试AI配置"""
